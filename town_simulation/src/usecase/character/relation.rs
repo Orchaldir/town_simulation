@@ -10,6 +10,18 @@ pub fn get_parents(manager: &CharacterMgr, character_id: CharacterId) -> HashSet
     get_direct_relation(manager, character_id, RelationType::Parent)
 }
 
+pub fn get_siblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
+    let mut siblings = HashSet::new();
+
+    for parent_id in get_parents(manager, character_id) {
+        siblings.extend(&get_children(manager, parent_id));
+    }
+
+    siblings.remove(&character_id);
+
+    siblings
+}
+
 fn get_direct_relation(
     manager: &CharacterMgr,
     character_id: CharacterId,
@@ -45,6 +57,7 @@ mod tests {
 
         let character0 = create_child(&mut manager, father, mother);
         let character1 = create_child(&mut manager, father, mother);
+        let character2 = create_child(&mut manager, father, mother);
 
         assert_children(&manager, grandfather0, [father]);
         assert_children(&manager, grandmother0, [father]);
@@ -54,10 +67,16 @@ mod tests {
         assert_children(&manager, grandmother1, [mother]);
         assert_parents(&manager, mother, [grandfather1, grandmother1]);
 
-        assert_children(&manager, father, [character0, character1]);
-        assert_children(&manager, mother, [character0, character1]);
+        assert_children(&manager, father, [character0, character1, character2]);
+        assert_children(&manager, mother, [character0, character1, character2]);
+
         assert_parents(&manager, character0, [father, mother]);
         assert_parents(&manager, character1, [father, mother]);
+        assert_parents(&manager, character2, [father, mother]);
+
+        assert_siblings(&manager, character0, [character1, character2]);
+        assert_siblings(&manager, character1, [character0, character2]);
+        assert_siblings(&manager, character2, [character0, character1]);
     }
 
     fn assert_children<const N: usize>(
@@ -74,5 +93,13 @@ mod tests {
         parents: [CharacterId; N],
     ) {
         assert_eq!(get_parents(&manager, character), parents.into());
+    }
+
+    fn assert_siblings<const N: usize>(
+        manager: &CharacterMgr,
+        character: CharacterId,
+        siblings: [CharacterId; N],
+    ) {
+        assert_eq!(get_siblings(&manager, character), siblings.into());
     }
 }
