@@ -31,7 +31,7 @@ impl Character {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct CharacterMgr {
     characters: Vec<Character>,
 }

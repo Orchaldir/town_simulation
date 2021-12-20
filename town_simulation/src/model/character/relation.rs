@@ -1,18 +1,20 @@
 use crate::model::character::CharacterId;
+use derive_getters::Getters;
 use derive_more::Constructor;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum RelationType {
     GrandParent,
     /// Uncle or Aunt
     Pibling,
+    Parent,
     Cousin,
     Sibling,
     Child,
     GrandChild,
 }
 
-#[derive(Constructor, Copy, Clone, Debug, PartialEq)]
+#[derive(Constructor, Getters, Copy, Clone, Debug, PartialEq)]
 pub struct Relation {
     relation_type: RelationType,
     id: CharacterId,
