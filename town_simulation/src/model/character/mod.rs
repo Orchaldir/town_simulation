@@ -3,7 +3,7 @@ use derive_more::Constructor;
 
 pub mod relation;
 
-#[derive(Constructor, Copy, Clone, Debug, PartialEq)]
+#[derive(Constructor, Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct CharacterId(usize);
 
 impl CharacterId {

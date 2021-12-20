@@ -1,19 +1,20 @@
 use crate::model::character::relation::RelationType;
 use crate::model::character::{CharacterId, CharacterMgr};
+use std::collections::HashSet;
 
-pub fn get_parents(manager: &CharacterMgr, character_id: CharacterId) -> Vec<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::Parent)
+pub fn get_children(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
+    get_direct_relation(manager, character_id, RelationType::Child)
 }
 
-pub fn get_children(manager: &CharacterMgr, character_id: CharacterId) -> Vec<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::Child)
+pub fn get_parents(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
+    get_direct_relation(manager, character_id, RelationType::Parent)
 }
 
 fn get_direct_relation(
     manager: &CharacterMgr,
     character_id: CharacterId,
     relation_type: RelationType,
-) -> Vec<CharacterId> {
+) -> HashSet<CharacterId> {
     if let Some(character) = manager.get(character_id) {
         return character
             .relations
@@ -22,7 +23,7 @@ fn get_direct_relation(
             .map(|relation| *relation.id())
             .collect();
     }
-    Vec::default()
+    HashSet::default()
 }
 
 #[cfg(test)]
@@ -31,7 +32,7 @@ mod tests {
     use crate::usecase::character::create_child;
 
     #[test]
-    fn test_add() {
+    fn test_relations() {
         let mut manager = CharacterMgr::default();
 
         let grandfather0 = manager.create();
@@ -45,23 +46,33 @@ mod tests {
         let character0 = create_child(&mut manager, father, mother);
         let character1 = create_child(&mut manager, father, mother);
 
-        assert_eq!(get_children(&manager, grandfather0), vec![father]);
-        assert_eq!(get_children(&manager, grandmother0), vec![father]);
-        assert_eq!(
-            get_parents(&manager, father),
-            vec![grandfather0, grandmother0]
-        );
+        assert_children(&manager, grandfather0, [father]);
+        assert_children(&manager, grandmother0, [father]);
+        assert_parents(&manager, father, [grandfather0, grandmother0]);
 
-        assert_eq!(get_children(&manager, grandfather1), vec![mother]);
-        assert_eq!(get_children(&manager, grandmother1), vec![mother]);
-        assert_eq!(
-            get_parents(&manager, mother),
-            vec![grandfather1, grandmother1]
-        );
+        assert_children(&manager, grandfather1, [mother]);
+        assert_children(&manager, grandmother1, [mother]);
+        assert_parents(&manager, mother, [grandfather1, grandmother1]);
 
-        assert_eq!(get_children(&manager, father), vec![character0, character1]);
-        assert_eq!(get_children(&manager, mother), vec![character0, character1]);
-        assert_eq!(get_parents(&manager, character0), vec![father, mother]);
-        assert_eq!(get_parents(&manager, character1), vec![father, mother]);
+        assert_children(&manager, father, [character0, character1]);
+        assert_children(&manager, mother, [character0, character1]);
+        assert_parents(&manager, character0, [father, mother]);
+        assert_parents(&manager, character1, [father, mother]);
+    }
+
+    fn assert_children<const N: usize>(
+        manager: &CharacterMgr,
+        character: CharacterId,
+        children: [CharacterId; N],
+    ) {
+        assert_eq!(get_children(&manager, character), children.into());
+    }
+
+    fn assert_parents<const N: usize>(
+        manager: &CharacterMgr,
+        character: CharacterId,
+        parents: [CharacterId; N],
+    ) {
+        assert_eq!(get_parents(&manager, character), parents.into());
     }
 }
