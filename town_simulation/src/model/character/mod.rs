@@ -19,9 +19,9 @@ pub struct Character {
 }
 
 impl Character {
-    pub fn new(id: usize) -> Self {
+    pub fn new(id: CharacterId) -> Self {
         Character {
-            id: CharacterId::new(id),
+            id,
             relations: Vec::new(),
         }
     }
@@ -37,6 +37,12 @@ pub struct CharacterMgr {
 }
 
 impl CharacterMgr {
+    pub fn create(&mut self) -> CharacterId {
+        let id = CharacterId::new(self.characters.len());
+        self.characters.push(Character::new(id));
+        id
+    }
+
     pub fn get_all(&self) -> &Vec<Character> {
         &self.characters
     }
