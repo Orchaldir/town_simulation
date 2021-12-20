@@ -1,3 +1,5 @@
+pub mod relation;
+
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct CharacterId(usize);
 

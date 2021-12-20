@@ -1,0 +1,16 @@
+pub enum RelationType {
+    GrandFather,
+    GrandMother,
+    Uncle,
+    Aunt,
+    Father,
+    Mother,
+    Brother,
+    MaleCousin,
+    FemaleCousin,
+    Sister,
+    Son,
+    Daughter,
+    GrandSon,
+    GrandDaughter,
+}
