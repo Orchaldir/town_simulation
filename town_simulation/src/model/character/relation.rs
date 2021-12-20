@@ -12,7 +12,7 @@ pub enum RelationType {
     GrandChild,
 }
 
-#[derive(Constructor, Clone, Debug, PartialEq)]
+#[derive(Constructor, Copy, Clone, Debug, PartialEq)]
 pub struct Relation {
     relation_type: RelationType,
     id: CharacterId,

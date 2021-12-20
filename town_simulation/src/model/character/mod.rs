@@ -15,7 +15,7 @@ impl CharacterId {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Character {
     id: CharacterId,
-    relations: Vec<Relation>,
+    pub relations: Vec<Relation>,
 }
 
 impl Character {
