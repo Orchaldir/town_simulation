@@ -39,11 +39,11 @@ mod tests {
         let grandfather1 = manager.create();
         let grandmother1 = manager.create();
 
-        let father = create_child(&mut manager, vec![grandfather0, grandmother0]);
-        let mother = create_child(&mut manager, vec![grandfather1, grandmother1]);
+        let father = create_child(&mut manager, grandfather0, grandmother0);
+        let mother = create_child(&mut manager, grandfather1, grandmother1);
 
-        let character0 = create_child(&mut manager, vec![father, mother]);
-        let character1 = create_child(&mut manager, vec![father, mother]);
+        let character0 = create_child(&mut manager, father, mother);
+        let character1 = create_child(&mut manager, father, mother);
 
         assert_eq!(get_children(&manager, grandfather0), vec![father]);
         assert_eq!(get_children(&manager, grandmother0), vec![father]);

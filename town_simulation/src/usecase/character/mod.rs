@@ -3,7 +3,18 @@ use crate::model::character::{CharacterId, CharacterMgr};
 
 pub mod relation;
 
-pub fn create_child(manager: &mut CharacterMgr, parent_ids: Vec<CharacterId>) -> CharacterId {
+pub fn create_child(
+    manager: &mut CharacterMgr,
+    father: CharacterId,
+    mother: CharacterId,
+) -> CharacterId {
+    create_child_with_many_parents(manager, vec![father, mother])
+}
+
+pub fn create_child_with_many_parents(
+    manager: &mut CharacterMgr,
+    parent_ids: Vec<CharacterId>,
+) -> CharacterId {
     let child_id = manager.create();
     let child_relation = Relation::new(RelationType::Child, child_id);
 
