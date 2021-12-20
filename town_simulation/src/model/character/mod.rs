@@ -1,13 +1,12 @@
+use crate::model::character::relation::Relation;
+use derive_more::Constructor;
+
 pub mod relation;
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Constructor, Copy, Clone, Debug, PartialEq)]
 pub struct CharacterId(usize);
 
 impl CharacterId {
-    pub fn new(id: usize) -> Self {
-        CharacterId(id)
-    }
-
     pub fn id(&self) -> usize {
         self.0
     }
@@ -16,12 +15,14 @@ impl CharacterId {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Character {
     id: CharacterId,
+    relations: Vec<Relation>,
 }
 
 impl Character {
     pub fn new(id: usize) -> Self {
         Character {
             id: CharacterId::new(id),
+            relations: Vec::new(),
         }
     }
 
