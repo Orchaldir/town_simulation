@@ -4,7 +4,7 @@ use derive_more::Constructor;
 #[derive(Clone, Debug, PartialEq)]
 pub enum RelationType {
     GrandParent,
-    // Uncle or Aunt
+    /// Uncle or Aunt
     Pibling,
     Cousin,
     Sibling,
