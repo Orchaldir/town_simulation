@@ -19,6 +19,16 @@ pub fn get_grandchildren(
     grandchildren
 }
 
+pub fn get_grandparents(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
+    let mut grandparents = HashSet::new();
+
+    for child_id in get_parents(manager, character_id) {
+        grandparents.extend(&get_parents(manager, child_id));
+    }
+
+    grandparents
+}
+
 pub fn get_parents(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
     get_direct_relation(manager, character_id, RelationType::Parent)
 }
@@ -95,6 +105,22 @@ mod tests {
         assert_grandchildren(&manager, grandmother0, [character0, character1, character2]);
         assert_grandchildren(&manager, grandfather1, [character0, character1, character2]);
         assert_grandchildren(&manager, grandmother1, [character0, character1, character2]);
+
+        assert_grandparents(
+            &manager,
+            character0,
+            [grandfather0, grandmother0, grandfather1, grandmother1],
+        );
+        assert_grandparents(
+            &manager,
+            character1,
+            [grandfather0, grandmother0, grandfather1, grandmother1],
+        );
+        assert_grandparents(
+            &manager,
+            character2,
+            [grandfather0, grandmother0, grandfather1, grandmother1],
+        );
     }
 
     fn assert_children<const N: usize>(
@@ -111,6 +137,14 @@ mod tests {
         grandchildren: [CharacterId; N],
     ) {
         assert_eq!(get_grandchildren(&manager, character), grandchildren.into());
+    }
+
+    fn assert_grandparents<const N: usize>(
+        manager: &CharacterMgr,
+        character: CharacterId,
+        grandparents: [CharacterId; N],
+    ) {
+        assert_eq!(get_grandparents(&manager, character), grandparents.into());
     }
 
     fn assert_parents<const N: usize>(
