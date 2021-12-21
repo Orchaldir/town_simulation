@@ -2,21 +2,37 @@
 extern crate rocket;
 
 use rocket::State;
+use std::sync::Mutex;
 use town_simulation::model::character::CharacterMgr;
 use town_simulation::usecase::character::create_child;
 
+struct ViewerData {
+    characters: Mutex<CharacterMgr>,
+}
+
 #[get("/")]
-fn get_characters(characters: &State<CharacterMgr>) -> String {
-    format!("The town has {} characters!", characters.get_all().len())
+fn get_characters(data: &State<ViewerData>) -> String {
+    let lock = data.characters.lock().expect("lock shared data");
+    format!("The town has {} characters!", lock.get_all().len())
+}
+
+#[get("/add")]
+fn add_character(data: &State<ViewerData>) -> String {
+    let mut lock = data.characters.lock().expect("lock shared data");
+    let id = lock.create();
+    format!("Add character with id {}!", id.id())
 }
 
 #[rocket::main]
 async fn main() {
     let characters = init_characters();
+    let data = ViewerData {
+        characters: Mutex::new(characters),
+    };
 
     if let Err(e) = rocket::build()
-        .manage(characters)
-        .mount("/", routes![get_characters])
+        .manage(data)
+        .mount("/", routes![get_characters, add_character])
         .launch()
         .await
     {
