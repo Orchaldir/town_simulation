@@ -10,13 +10,19 @@ fn get_characters(characters: &State<CharacterMgr>) -> String {
     format!("The town has {} characters!", characters.get_all().len())
 }
 
-#[launch]
-fn rocket() -> _ {
+#[rocket::main]
+async fn main() {
     let characters = init_characters();
 
-    rocket::build()
+    if let Err(e) = rocket::build()
         .manage(characters)
         .mount("/", routes![get_characters])
+        .launch()
+        .await
+    {
+        println!("Rocket didn't launch!");
+        drop(e);
+    };
 }
 
 fn init_characters() -> CharacterMgr {
