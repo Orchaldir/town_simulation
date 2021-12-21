@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate rocket;
 
+use rocket::response::content::Html;
 use rocket::State;
 use std::sync::Mutex;
 use town_simulation::model::character::CharacterMgr;
@@ -11,9 +12,9 @@ struct ViewerData {
 }
 
 #[get("/")]
-fn get_characters(data: &State<ViewerData>) -> String {
+fn get_characters(data: &State<ViewerData>) -> Html<String> {
     let lock = data.characters.lock().expect("lock shared data");
-    format!("The town has {} characters!", lock.get_all().len())
+    Html(format!("<h1>Characters</h1><p>The town has {} characters!</p><p>Click <a href=\"/add\">here</a> to add another!</p>", lock.get_all().len()))
 }
 
 #[get("/add")]
