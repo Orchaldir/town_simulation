@@ -1,6 +1,6 @@
 use crate::model::character::relation::{Relation, RelationType};
 use crate::model::character::{CharacterId, CharacterMgr};
-use crate::usecase::character::relation::{
+use crate::usecase::character::relation::get::{
     combine, get_children, get_parents, get_shared_children, get_siblings,
 };
 use std::collections::HashSet;
