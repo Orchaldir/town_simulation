@@ -7,6 +7,8 @@ pub enum RelationType {
     GrandParent,
     /// Uncle or Aunt
     Pibling,
+    /// Nephew or Niece
+    Nibling,
     Parent,
     Cousin,
     Sibling,

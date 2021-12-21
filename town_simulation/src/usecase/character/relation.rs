@@ -9,11 +9,21 @@ pub fn get_children(manager: &CharacterMgr, character_id: CharacterId) -> HashSe
 pub fn get_cousins(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
     let mut cousin = HashSet::new();
 
-    for pibling_id in get_pibling(manager, character_id) {
+    for pibling_id in get_piblings(manager, character_id) {
         cousin.extend(&get_children(manager, pibling_id));
     }
 
     cousin
+}
+
+pub fn get_niblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
+    let mut niblings = HashSet::new();
+
+    for sibling_id in get_siblings(manager, character_id) {
+        niblings.extend(&get_children(manager, sibling_id));
+    }
+
+    niblings
 }
 
 pub fn get_grandchildren(
@@ -43,14 +53,14 @@ pub fn get_parents(manager: &CharacterMgr, character_id: CharacterId) -> HashSet
     get_direct_relation(manager, character_id, RelationType::Parent)
 }
 
-pub fn get_pibling(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    let mut pibling = HashSet::new();
+pub fn get_piblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
+    let mut piblings = HashSet::new();
 
     for parent_id in get_parents(manager, character_id) {
-        pibling.extend(&get_siblings(manager, parent_id));
+        piblings.extend(&get_siblings(manager, parent_id));
     }
 
-    pibling
+    piblings
 }
 
 pub fn get_siblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
@@ -149,6 +159,13 @@ mod tests {
         assert_siblings(&manager, uncle, [mother]);
         assert_siblings(&manager, husband_aunt, []);
 
+        // niblings of generation 1
+        assert_niblings(&manager, father, [cousin]);
+        assert_niblings(&manager, mother, []);
+        assert_niblings(&manager, aunt, [character0, character1, character2]);
+        assert_niblings(&manager, uncle, [character0, character1, character2]);
+        assert_niblings(&manager, husband_aunt, []);
+
         // parents of generation 2
         assert_parents(&manager, character0, [father, mother]);
         assert_parents(&manager, character1, [father, mother]);
@@ -237,7 +254,15 @@ mod tests {
         character: CharacterId,
         piblings: [CharacterId; N],
     ) {
-        assert_eq!(get_pibling(&manager, character), piblings.into());
+        assert_eq!(get_piblings(&manager, character), piblings.into());
+    }
+
+    fn assert_niblings<const N: usize>(
+        manager: &CharacterMgr,
+        character: CharacterId,
+        niblings: [CharacterId; N],
+    ) {
+        assert_eq!(get_niblings(&manager, character), niblings.into());
     }
 
     fn assert_cousins<const N: usize>(
