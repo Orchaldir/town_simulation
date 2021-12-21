@@ -83,7 +83,7 @@ mod tests {
     use crate::usecase::character::create_child;
 
     #[test]
-    fn test_relations() {
+    fn test_get_relatives() {
         let mut manager = CharacterMgr::default();
 
         // generation 0
