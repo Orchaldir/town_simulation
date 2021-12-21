@@ -6,14 +6,25 @@ pub fn get_children(manager: &CharacterMgr, character_id: CharacterId) -> HashSe
     get_direct_relation(manager, character_id, RelationType::Child)
 }
 
+pub fn get_shared_children(
+    manager: &CharacterMgr,
+    character0: CharacterId,
+    character1: CharacterId,
+) -> HashSet<CharacterId> {
+    get_children(manager, character0)
+        .intersection(&get_children(manager, character1))
+        .copied()
+        .collect()
+}
+
 pub fn get_cousins(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    let mut cousin = HashSet::new();
+    let mut cousins = HashSet::new();
 
     for pibling_id in get_piblings(manager, character_id) {
-        cousin.extend(&get_children(manager, pibling_id));
+        cousins.extend(&get_children(manager, pibling_id));
     }
 
-    cousin
+    cousins
 }
 
 pub fn get_niblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
@@ -125,6 +136,15 @@ mod tests {
         assert_children(&manager, grandfather1, [mother, uncle]);
         assert_children(&manager, grandmother1, [mother, uncle]);
 
+        assert(
+            get_shared_children(&manager, grandfather0, grandmother0),
+            [aunt, father],
+        );
+        assert(
+            get_shared_children(&manager, grandfather1, grandmother1),
+            [mother, uncle],
+        );
+
         // grandchildren of generation 0
         assert_grandchildren(
             &manager,
@@ -151,6 +171,12 @@ mod tests {
         assert_children(&manager, husband_aunt, [cousin]);
         assert_children(&manager, aunt, [cousin]);
         assert_children(&manager, uncle, []);
+
+        assert(
+            get_shared_children(&manager, father, mother),
+            [character0, character1, character2],
+        );
+        assert(get_shared_children(&manager, husband_aunt, aunt), [cousin]);
 
         // siblings of generation 1
         assert_siblings(&manager, father, [aunt]);
@@ -207,6 +233,10 @@ mod tests {
             [grandfather0, grandmother0, grandfather1, grandmother1],
         );
         assert_grandparents(&manager, cousin, [grandfather0, grandmother0]);
+    }
+
+    fn assert<const N: usize>(left: HashSet<CharacterId>, right: [CharacterId; N]) {
+        assert_eq!(left, right.into());
     }
 
     fn assert_children<const N: usize>(
