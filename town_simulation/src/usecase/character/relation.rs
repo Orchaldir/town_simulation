@@ -2,6 +2,19 @@ use crate::model::character::relation::RelationType;
 use crate::model::character::{CharacterId, CharacterMgr};
 use std::collections::HashSet;
 
+pub fn combine<F>(character_ids: &HashSet<CharacterId>, mut f: F) -> HashSet<CharacterId>
+where
+    F: FnMut(CharacterId) -> HashSet<CharacterId>,
+{
+    let mut combined_ids = HashSet::new();
+
+    for character_id in character_ids {
+        combined_ids.extend(f(*character_id));
+    }
+
+    combined_ids
+}
+
 pub fn get_children(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
     get_direct_relation(manager, character_id, RelationType::Child)
 }
@@ -18,46 +31,22 @@ pub fn get_shared_children(
 }
 
 pub fn get_cousins(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    let mut cousins = HashSet::new();
-
-    for pibling_id in get_piblings(manager, character_id) {
-        cousins.extend(&get_children(manager, pibling_id));
-    }
-
-    cousins
+    get_direct_relation(manager, character_id, RelationType::Cousin)
 }
 
 pub fn get_niblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    let mut niblings = HashSet::new();
-
-    for sibling_id in get_siblings(manager, character_id) {
-        niblings.extend(&get_children(manager, sibling_id));
-    }
-
-    niblings
+    get_direct_relation(manager, character_id, RelationType::Nibling)
 }
 
 pub fn get_grandchildren(
     manager: &CharacterMgr,
     character_id: CharacterId,
 ) -> HashSet<CharacterId> {
-    let mut grandchildren = HashSet::new();
-
-    for child_id in get_children(manager, character_id) {
-        grandchildren.extend(&get_children(manager, child_id));
-    }
-
-    grandchildren
+    get_direct_relation(manager, character_id, RelationType::GrandChild)
 }
 
 pub fn get_grandparents(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    let mut grandparents = HashSet::new();
-
-    for parent_id in get_parents(manager, character_id) {
-        grandparents.extend(&get_parents(manager, parent_id));
-    }
-
-    grandparents
+    get_direct_relation(manager, character_id, RelationType::GrandParent)
 }
 
 pub fn get_parents(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
@@ -65,25 +54,11 @@ pub fn get_parents(manager: &CharacterMgr, character_id: CharacterId) -> HashSet
 }
 
 pub fn get_piblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    let mut piblings = HashSet::new();
-
-    for parent_id in get_parents(manager, character_id) {
-        piblings.extend(&get_siblings(manager, parent_id));
-    }
-
-    piblings
+    get_direct_relation(manager, character_id, RelationType::Pibling)
 }
 
 pub fn get_siblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    let mut siblings = HashSet::new();
-
-    for parent_id in get_parents(manager, character_id) {
-        siblings.extend(&get_children(manager, parent_id));
-    }
-
-    siblings.remove(&character_id);
-
-    siblings
+    get_direct_relation(manager, character_id, RelationType::Sibling)
 }
 
 fn get_direct_relation(
