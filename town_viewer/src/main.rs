@@ -5,7 +5,7 @@ use rocket::fs::FileServer;
 use rocket::response::content::Html;
 use rocket::State;
 use std::sync::Mutex;
-use town_simulation::model::character::CharacterMgr;
+use town_simulation::model::character::{Character, CharacterMgr};
 use town_simulation::usecase::character::create_child;
 
 struct ViewerData {
@@ -23,13 +23,33 @@ fn get_characters(data: &State<ViewerData>) -> Html<String> {
  </head>
  <body>
   <h1>Characters</h1>
-  <p>The town has {} characters!</p>
+  <p>The town has {} characters:</p>
+  <ul>
+    {}
+  </ul>
   <p>Click <a href=\"/add\">here</a> to add another!</p>
  </body>
 </html>
 ",
-        lock.get_all().len()
+        lock.get_all().len(),
+        get_character_list(lock.get_all()),
     ))
+}
+
+fn get_character_list(characters: &[Character]) -> String {
+    let vector: Vec<String> = characters
+        .iter()
+        .map(|c| get_character_in_list(c))
+        .collect();
+
+    vector.join("\n")
+}
+
+fn get_character_in_list(character: &Character) -> String {
+    format!(
+        "   <li><a href=\"/{0}\">Character {0}</a></li>",
+        character.id().id()
+    )
 }
 
 #[get("/add")]
