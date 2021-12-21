@@ -105,47 +105,36 @@ mod tests {
         let character2 = create_child(&mut manager, father, mother);
         let cousin = create_child(&mut manager, husband_aunt, aunt);
 
-        // children of generation 0
-        assert_children(&manager, grandfather0, [aunt, father]);
-        assert_children(&manager, grandmother0, [aunt, father]);
-        assert_children(&manager, grandfather1, [mother, uncle]);
-        assert_children(&manager, grandmother1, [mother, uncle]);
-
-        assert(
-            get_shared_children(&manager, grandfather0, grandmother0),
-            [aunt, father],
-        );
-        assert(
-            get_shared_children(&manager, grandfather1, grandmother1),
-            [mother, uncle],
-        );
-
         // grandchildren of generation 0
-        assert_grandchildren(
-            &manager,
-            grandfather0,
+        assert(
+            get_grandchildren(&manager, grandfather0),
             [character0, character1, character2, cousin],
         );
-        assert_grandchildren(
-            &manager,
-            grandmother0,
+        assert(
+            get_grandchildren(&manager, grandmother0),
             [character0, character1, character2, cousin],
         );
-        assert_grandchildren(&manager, grandfather1, [character0, character1, character2]);
-        assert_grandchildren(&manager, grandmother1, [character0, character1, character2]);
-
-        // parents of generation 1
-        assert_parents(&manager, father, [grandfather0, grandmother0]);
-        assert_parents(&manager, aunt, [grandfather0, grandmother0]);
-        assert_parents(&manager, mother, [grandfather1, grandmother1]);
-        assert_parents(&manager, husband_aunt, []);
+        assert(
+            get_grandchildren(&manager, grandfather1),
+            [character0, character1, character2],
+        );
+        assert(
+            get_grandchildren(&manager, grandmother1),
+            [character0, character1, character2],
+        );
 
         // children of generation 1
-        assert_children(&manager, father, [character0, character1, character2]);
-        assert_children(&manager, mother, [character0, character1, character2]);
-        assert_children(&manager, husband_aunt, [cousin]);
-        assert_children(&manager, aunt, [cousin]);
-        assert_children(&manager, uncle, []);
+        assert(
+            get_children(&manager, father),
+            [character0, character1, character2],
+        );
+        assert(
+            get_children(&manager, mother),
+            [character0, character1, character2],
+        );
+        assert(get_children(&manager, husband_aunt), [cousin]);
+        assert(get_children(&manager, aunt), [cousin]);
+        assert(get_children(&manager, uncle), []);
 
         assert(
             get_shared_children(&manager, father, mother),
@@ -153,128 +142,66 @@ mod tests {
         );
         assert(get_shared_children(&manager, husband_aunt, aunt), [cousin]);
 
-        // siblings of generation 1
-        assert_siblings(&manager, father, [aunt]);
-        assert_siblings(&manager, aunt, [father]);
-        assert_siblings(&manager, mother, [uncle]);
-        assert_siblings(&manager, uncle, [mother]);
-        assert_siblings(&manager, husband_aunt, []);
-
         // niblings of generation 1
-        assert_niblings(&manager, father, [cousin]);
-        assert_niblings(&manager, mother, []);
-        assert_niblings(&manager, aunt, [character0, character1, character2]);
-        assert_niblings(&manager, uncle, [character0, character1, character2]);
-        assert_niblings(&manager, husband_aunt, []);
+        assert(get_niblings(&manager, father), [cousin]);
+        assert(get_niblings(&manager, mother), []);
+        assert(
+            get_niblings(&manager, aunt),
+            [character0, character1, character2],
+        );
+        assert(
+            get_niblings(&manager, uncle),
+            [character0, character1, character2],
+        );
+        assert(get_niblings(&manager, husband_aunt), []);
 
         // parents of generation 2
-        assert_parents(&manager, character0, [father, mother]);
-        assert_parents(&manager, character1, [father, mother]);
-        assert_parents(&manager, character2, [father, mother]);
-        assert_parents(&manager, cousin, [husband_aunt, aunt]);
+        assert(get_parents(&manager, character0), [father, mother]);
+        assert(get_parents(&manager, character1), [father, mother]);
+        assert(get_parents(&manager, character2), [father, mother]);
+        assert(get_parents(&manager, cousin), [husband_aunt, aunt]);
 
         // siblings of generation 2
-        assert_siblings(&manager, character0, [character1, character2]);
-        assert_siblings(&manager, character1, [character0, character2]);
-        assert_siblings(&manager, character2, [character0, character1]);
-        assert_siblings(&manager, cousin, []);
+        assert(get_siblings(&manager, character0), [character1, character2]);
+        assert(get_siblings(&manager, character1), [character0, character2]);
+        assert(get_siblings(&manager, character2), [character0, character1]);
+        assert(get_siblings(&manager, cousin), []);
 
         // piblings of generation 2
-        assert_piblings(&manager, character0, [aunt, uncle]);
-        assert_piblings(&manager, character1, [aunt, uncle]);
-        assert_piblings(&manager, character2, [aunt, uncle]);
-        assert_piblings(&manager, cousin, [father]);
+        assert(get_piblings(&manager, character0), [aunt, uncle]);
+        assert(get_piblings(&manager, character1), [aunt, uncle]);
+        assert(get_piblings(&manager, character2), [aunt, uncle]);
+        assert(get_piblings(&manager, cousin), [father]);
 
         // cousins of generation 2
-        assert_cousins(&manager, character0, [cousin]);
-        assert_cousins(&manager, character1, [cousin]);
-        assert_cousins(&manager, character2, [cousin]);
-        assert_cousins(&manager, cousin, [character0, character1, character2]);
+        assert(get_cousins(&manager, character0), [cousin]);
+        assert(get_cousins(&manager, character1), [cousin]);
+        assert(get_cousins(&manager, character2), [cousin]);
+        assert(
+            get_cousins(&manager, cousin),
+            [character0, character1, character2],
+        );
 
         // grandparents of generation 2
-        assert_grandparents(
-            &manager,
-            character0,
+        assert(
+            get_grandparents(&manager, character0),
             [grandfather0, grandmother0, grandfather1, grandmother1],
         );
-        assert_grandparents(
-            &manager,
-            character1,
+        assert(
+            get_grandparents(&manager, character1),
             [grandfather0, grandmother0, grandfather1, grandmother1],
         );
-        assert_grandparents(
-            &manager,
-            character2,
+        assert(
+            get_grandparents(&manager, character2),
             [grandfather0, grandmother0, grandfather1, grandmother1],
         );
-        assert_grandparents(&manager, cousin, [grandfather0, grandmother0]);
+        assert(
+            get_grandparents(&manager, cousin),
+            [grandfather0, grandmother0],
+        );
     }
 
     fn assert<const N: usize>(left: HashSet<CharacterId>, right: [CharacterId; N]) {
         assert_eq!(left, right.into());
-    }
-
-    fn assert_children<const N: usize>(
-        manager: &CharacterMgr,
-        character: CharacterId,
-        children: [CharacterId; N],
-    ) {
-        assert_eq!(get_children(&manager, character), children.into());
-    }
-
-    fn assert_grandchildren<const N: usize>(
-        manager: &CharacterMgr,
-        character: CharacterId,
-        grandchildren: [CharacterId; N],
-    ) {
-        assert_eq!(get_grandchildren(&manager, character), grandchildren.into());
-    }
-
-    fn assert_grandparents<const N: usize>(
-        manager: &CharacterMgr,
-        character: CharacterId,
-        grandparents: [CharacterId; N],
-    ) {
-        assert_eq!(get_grandparents(&manager, character), grandparents.into());
-    }
-
-    fn assert_parents<const N: usize>(
-        manager: &CharacterMgr,
-        character: CharacterId,
-        parents: [CharacterId; N],
-    ) {
-        assert_eq!(get_parents(&manager, character), parents.into());
-    }
-
-    fn assert_siblings<const N: usize>(
-        manager: &CharacterMgr,
-        character: CharacterId,
-        siblings: [CharacterId; N],
-    ) {
-        assert_eq!(get_siblings(&manager, character), siblings.into());
-    }
-
-    fn assert_piblings<const N: usize>(
-        manager: &CharacterMgr,
-        character: CharacterId,
-        piblings: [CharacterId; N],
-    ) {
-        assert_eq!(get_piblings(&manager, character), piblings.into());
-    }
-
-    fn assert_niblings<const N: usize>(
-        manager: &CharacterMgr,
-        character: CharacterId,
-        niblings: [CharacterId; N],
-    ) {
-        assert_eq!(get_niblings(&manager, character), niblings.into());
-    }
-
-    fn assert_cousins<const N: usize>(
-        manager: &CharacterMgr,
-        character: CharacterId,
-        cousins: [CharacterId; N],
-    ) {
-        assert_eq!(get_cousins(&manager, character), cousins.into());
     }
 }

@@ -4,6 +4,7 @@ use crate::usecase::character::relation::get::{
     combine, get_children, get_parents, get_shared_children, get_siblings,
 };
 use std::collections::HashSet;
+use RelationType::*;
 
 pub mod relation;
 
@@ -19,11 +20,11 @@ pub fn create_child(
     let piblings = combine(&parents, |id| get_siblings(manager, id));
     let cousins = combine(&piblings, |id| get_children(manager, id));
 
-    add_relation(manager, child_id, &grandparents, RelationType::GrandChild);
-    add_relation(manager, child_id, &cousins, RelationType::Cousin);
-    add_relation(manager, child_id, &piblings, RelationType::Nibling);
-    add_relation(manager, child_id, &siblings, RelationType::Sibling);
-    add_relation(manager, child_id, &parents, RelationType::Child);
+    add_relation(manager, child_id, &grandparents, GrandChild);
+    add_relation(manager, child_id, &cousins, Cousin);
+    add_relation(manager, child_id, &piblings, Nibling);
+    add_relation(manager, child_id, &siblings, Sibling);
+    add_relation(manager, child_id, &parents, Child);
 
     child_id
 }
