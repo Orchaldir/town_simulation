@@ -16,6 +16,21 @@ pub enum RelationType {
     GrandChild,
 }
 
+impl RelationType {
+    pub fn reverse(&self) -> RelationType {
+        match self {
+            RelationType::GrandParent => RelationType::GrandChild,
+            RelationType::Pibling => RelationType::Nibling,
+            RelationType::Nibling => RelationType::Pibling,
+            RelationType::Parent => RelationType::Child,
+            RelationType::Cousin => RelationType::Cousin,
+            RelationType::Sibling => RelationType::Sibling,
+            RelationType::Child => RelationType::Parent,
+            RelationType::GrandChild => RelationType::GrandParent,
+        }
+    }
+}
+
 #[derive(Constructor, Getters, Copy, Clone, Debug, PartialEq)]
 pub struct Relation {
     relation_type: RelationType,
