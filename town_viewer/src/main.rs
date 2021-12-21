@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate rocket;
 
+use rocket::fs::FileServer;
 use rocket::response::content::Html;
 use rocket::State;
 use std::sync::Mutex;
@@ -14,7 +15,21 @@ struct ViewerData {
 #[get("/")]
 fn get_characters(data: &State<ViewerData>) -> Html<String> {
     let lock = data.characters.lock().expect("lock shared data");
-    Html(format!("<h1>Characters</h1><p>The town has {} characters!</p><p>Click <a href=\"/add\">here</a> to add another!</p>", lock.get_all().len()))
+    Html(format!(
+        "<!DOCTYPE html>
+<html>
+ <head>
+  <link rel=\"stylesheet\" href=\"static/style.css\">
+ </head>
+ <body>
+  <h1>Characters</h1>
+  <p>The town has {} characters!</p>
+  <p>Click <a href=\"/add\">here</a> to add another!</p>
+ </body>
+</html>
+",
+        lock.get_all().len()
+    ))
 }
 
 #[get("/add")]
@@ -33,6 +48,7 @@ async fn main() {
 
     if let Err(e) = rocket::build()
         .manage(data)
+        .mount("/static", FileServer::from("town_viewer/static/"))
         .mount("/", routes![get_characters, add_character])
         .launch()
         .await
