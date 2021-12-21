@@ -5,6 +5,7 @@ use rocket::fs::FileServer;
 use rocket::response::content::Html;
 use rocket::State;
 use std::sync::Mutex;
+use town_simulation::model::character::relation::Relation;
 use town_simulation::model::character::{Character, CharacterId, CharacterMgr};
 use town_simulation::usecase::character::create_child;
 
@@ -64,11 +65,16 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
  </head>
  <body>
   <h1>Character {}</h1>
+  <h2>Relations</h2>
+  <ul>
+    {}
+  </ul>
   <a href=\"/\">Back</a>
  </body>
 </html>
 ",
             character.id().id(),
+            show_relations(character),
         ))
     } else {
         Html(format!(
@@ -86,6 +92,24 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
             id,
         ))
     }
+}
+
+fn show_relations(character: &Character) -> String {
+    let vector: Vec<String> = character
+        .relations
+        .iter()
+        .map(|r| show_relation(r))
+        .collect();
+
+    vector.join("\n")
+}
+
+fn show_relation(relation: &Relation) -> String {
+    format!(
+        "   <li>{0:?}: <a href=\"/{1}\">Character {1}</a></li>",
+        relation.relation_type(),
+        relation.id().id(),
+    )
 }
 
 #[rocket::main]
