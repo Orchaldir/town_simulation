@@ -5,7 +5,7 @@ use rocket::fs::FileServer;
 use rocket::response::content::Html;
 use rocket::State;
 use std::sync::Mutex;
-use town_simulation::model::character::{Character, CharacterMgr};
+use town_simulation::model::character::{Character, CharacterId, CharacterMgr};
 use town_simulation::usecase::character::create_child;
 
 struct ViewerData {
@@ -27,7 +27,6 @@ fn get_characters(data: &State<ViewerData>) -> Html<String> {
   <ul>
     {}
   </ul>
-  <p>Click <a href=\"/add\">here</a> to add another!</p>
  </body>
 </html>
 ",
@@ -52,11 +51,41 @@ fn get_character_in_list(character: &Character) -> String {
     )
 }
 
-#[get("/add")]
-fn add_character(data: &State<ViewerData>) -> String {
-    let mut lock = data.characters.lock().expect("lock shared data");
-    let id = lock.create();
-    format!("Add character with id {}!", id.id())
+#[get("/<id>")]
+fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
+    let lock = data.characters.lock().expect("lock shared data");
+
+    if let Some(character) = lock.get(CharacterId::new(id)) {
+        Html(format!(
+            "<!DOCTYPE html>
+<html>
+ <head>
+  <link rel=\"stylesheet\" href=\"static/style.css\">
+ </head>
+ <body>
+  <h1>Character {}</h1>
+  <a href=\"/\">Back</a>
+ </body>
+</html>
+",
+            character.id().id(),
+        ))
+    } else {
+        Html(format!(
+            "<!DOCTYPE html>
+<html>
+ <head>
+  <link rel=\"stylesheet\" href=\"static/style.css\">
+ </head>
+ <body>
+  <h1>Unknown Character {}!</h1>
+  <a href=\"/\">Back</a>
+ </body>
+</html>
+",
+            id,
+        ))
+    }
 }
 
 #[rocket::main]
@@ -69,7 +98,7 @@ async fn main() {
     if let Err(e) = rocket::build()
         .manage(data)
         .mount("/static", FileServer::from("town_viewer/static/"))
-        .mount("/", routes![get_characters, add_character])
+        .mount("/", routes![get_characters, get_character])
         .launch()
         .await
     {
