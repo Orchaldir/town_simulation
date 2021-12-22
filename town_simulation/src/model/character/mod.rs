@@ -1,5 +1,6 @@
 use crate::model::character::relation::Relation;
 use derive_more::Constructor;
+use crate::model::character::name::CharacterName;
 
 pub mod name;
 pub mod relation;
@@ -16,6 +17,7 @@ impl CharacterId {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Character {
     id: CharacterId,
+    name: CharacterName,
     pub relations: Vec<Relation>,
 }
 
@@ -23,6 +25,7 @@ impl Character {
     pub fn new(id: CharacterId) -> Self {
         Character {
             id,
+            name: CharacterName::simple(id.0.to_string()),
             relations: Vec::new(),
         }
     }
