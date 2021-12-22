@@ -1,14 +1,14 @@
 use crate::generation::name::character::CharacterNameGenerator;
 use crate::model::character::gender::Gender;
 use crate::model::character::name::CharacterName;
-use crate::model::character::relation::family::RelationType;
+use crate::model::character::relation::family::FamilyRelationType;
 use crate::model::character::relation::Relation;
 use crate::model::character::{CharacterId, CharacterMgr};
 use crate::usecase::character::relation::get::{
     combine, get_children, get_parents, get_shared_children, get_siblings,
 };
 use std::collections::HashSet;
-use RelationType::*;
+use FamilyRelationType::*;
 
 pub mod relation;
 
@@ -64,7 +64,7 @@ fn add_relation(
     manager: &mut CharacterMgr,
     character: CharacterId,
     others: &HashSet<CharacterId>,
-    relation_type: RelationType,
+    relation_type: FamilyRelationType,
 ) {
     let relation = Relation::new(relation_type, character);
     let other_type = relation_type.reverse();

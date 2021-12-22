@@ -2,9 +2,10 @@ use crate::model::character::gender::Gender;
 use crate::model::character::CharacterId;
 use derive_getters::Getters;
 use derive_more::Constructor;
+use FamilyRelationType::*;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
-pub enum RelationType {
+pub enum FamilyRelationType {
     GrandParent,
     /// Uncle or Aunt
     Pibling,
@@ -17,42 +18,42 @@ pub enum RelationType {
     GrandChild,
 }
 
-impl RelationType {
-    pub fn reverse(&self) -> RelationType {
+impl FamilyRelationType {
+    pub fn reverse(&self) -> FamilyRelationType {
         match self {
-            RelationType::GrandParent => RelationType::GrandChild,
-            RelationType::Pibling => RelationType::Nibling,
-            RelationType::Nibling => RelationType::Pibling,
-            RelationType::Parent => RelationType::Child,
-            RelationType::Cousin => RelationType::Cousin,
-            RelationType::Sibling => RelationType::Sibling,
-            RelationType::Child => RelationType::Parent,
-            RelationType::GrandChild => RelationType::GrandParent,
+            GrandParent => GrandChild,
+            Pibling => Nibling,
+            Nibling => Pibling,
+            Parent => Child,
+            Cousin => Cousin,
+            Sibling => Sibling,
+            Child => Parent,
+            GrandChild => GrandParent,
         }
     }
 
     pub fn get_gender_specific_string(&self, gender: Gender) -> &str {
         if gender == Gender::Male {
             match self {
-                RelationType::GrandParent => "grandfather",
-                RelationType::Pibling => "uncle",
-                RelationType::Nibling => "nephew",
-                RelationType::Parent => "father",
-                RelationType::Cousin => "cousin",
-                RelationType::Sibling => "brother",
-                RelationType::Child => "son",
-                RelationType::GrandChild => "grandson",
+                GrandParent => "grandfather",
+                Pibling => "uncle",
+                Nibling => "nephew",
+                Parent => "father",
+                Cousin => "cousin",
+                Sibling => "brother",
+                Child => "son",
+                GrandChild => "grandson",
             }
         } else {
             match self {
-                RelationType::GrandParent => "grandmother",
-                RelationType::Pibling => "aunt",
-                RelationType::Nibling => "niece",
-                RelationType::Parent => "mother",
-                RelationType::Cousin => "cousin",
-                RelationType::Sibling => "sister",
-                RelationType::Child => "daughter",
-                RelationType::GrandChild => "granddaughter",
+                GrandParent => "grandmother",
+                Pibling => "aunt",
+                Nibling => "niece",
+                Parent => "mother",
+                Cousin => "cousin",
+                Sibling => "sister",
+                Child => "daughter",
+                GrandChild => "granddaughter",
             }
         }
     }
@@ -60,6 +61,6 @@ impl RelationType {
 
 #[derive(Constructor, Getters, Copy, Clone, Debug, PartialEq)]
 pub struct Relation {
-    relation_type: RelationType,
+    relation_type: FamilyRelationType,
     id: CharacterId,
 }

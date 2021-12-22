@@ -1,7 +1,7 @@
-use crate::model::character::relation::family::RelationType;
+use crate::model::character::relation::family::FamilyRelationType;
 use crate::model::character::{CharacterId, CharacterMgr};
 use std::collections::HashSet;
-use RelationType::*;
+use FamilyRelationType::*;
 
 pub fn combine<F>(character_ids: &HashSet<CharacterId>, mut f: F) -> HashSet<CharacterId>
 where
@@ -65,7 +65,7 @@ pub fn get_siblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSe
 fn get_direct_relation(
     manager: &CharacterMgr,
     character_id: CharacterId,
-    relation_type: RelationType,
+    relation_type: FamilyRelationType,
 ) -> HashSet<CharacterId> {
     if let Some(character) = manager.get(character_id) {
         return character
