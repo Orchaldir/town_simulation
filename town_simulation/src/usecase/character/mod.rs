@@ -11,6 +11,7 @@ use std::collections::HashSet;
 use RelationType::*;
 use RelativeType::*;
 
+pub mod marriage;
 pub mod relation;
 
 pub fn create_child(
@@ -61,7 +62,7 @@ pub fn set_gender_based_on_id(manager: &mut CharacterMgr, id: CharacterId) {
     set_gender(manager, id, gender);
 }
 
-fn add_relation(
+pub fn add_relation(
     manager: &mut CharacterMgr,
     character: CharacterId,
     others: &HashSet<CharacterId>,
