@@ -1,5 +1,7 @@
+use csv::Reader;
 use derive_more::Constructor;
 use serde::Deserialize;
+use std::io;
 
 #[derive(Constructor, Debug, Deserialize)]
 pub struct Entry {
@@ -28,12 +30,21 @@ impl NameGenerator {
     }
 
     pub fn read(path: &str) -> Self {
-        let mut reader =
-            csv::Reader::from_path(path).unwrap_or_else(|_| panic!("Cannot open file {}", path));
+        Self::parse_reader(
+            csv::Reader::from_path(path).unwrap_or_else(|_| panic!("Cannot open file {}", path)),
+        )
+    }
+
+    pub fn parse(text: &str) -> Self {
+        Self::parse_reader(csv::Reader::from_reader(text.as_bytes()))
+    }
+
+    fn parse_reader<T: io::Read>(mut reader: Reader<T>) -> Self {
         let mut entries = Vec::new();
 
         for (line, record) in reader.deserialize().enumerate() {
-            let entry: Entry = record.unwrap_or_else(|_| panic!("Cannot read line {}", line));
+            let entry: Entry =
+                record.unwrap_or_else(|e| panic!("Cannot read line {}: {}", line, e));
             entries.push(entry);
         }
 
@@ -70,5 +81,21 @@ mod tests {
         assert_eq!(generator.get(3), "B");
         assert_eq!(generator.get(4), "B");
         assert_eq!(generator.get(5), "A");
+    }
+
+    #[test]
+    fn test_parse() {
+        let generator = NameGenerator::parse(
+            "name,value
+C,2
+D,3",
+        );
+
+        assert_eq!(generator.get(0), "C");
+        assert_eq!(generator.get(1), "C");
+        assert_eq!(generator.get(2), "D");
+        assert_eq!(generator.get(3), "D");
+        assert_eq!(generator.get(4), "D");
+        assert_eq!(generator.get(5), "C");
     }
 }
