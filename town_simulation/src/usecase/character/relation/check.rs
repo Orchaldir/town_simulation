@@ -1,4 +1,4 @@
-use crate::model::character::relation::RelationType;
+use crate::model::character::relation::family::RelationType;
 use crate::model::character::{CharacterId, CharacterMgr};
 
 pub fn get_relation(

@@ -1,6 +1,7 @@
-use crate::model::character::relation::RelationType;
+use crate::model::character::relation::family::RelationType;
 use crate::model::character::{CharacterId, CharacterMgr};
 use std::collections::HashSet;
+use RelationType::*;
 
 pub fn combine<F>(character_ids: &HashSet<CharacterId>, mut f: F) -> HashSet<CharacterId>
 where
@@ -16,7 +17,7 @@ where
 }
 
 pub fn get_children(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::Child)
+    get_direct_relation(manager, character_id, Child)
 }
 
 pub fn get_shared_children(
@@ -31,34 +32,34 @@ pub fn get_shared_children(
 }
 
 pub fn get_cousins(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::Cousin)
+    get_direct_relation(manager, character_id, Cousin)
 }
 
 pub fn get_niblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::Nibling)
+    get_direct_relation(manager, character_id, Nibling)
 }
 
 pub fn get_grandchildren(
     manager: &CharacterMgr,
     character_id: CharacterId,
 ) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::GrandChild)
+    get_direct_relation(manager, character_id, GrandChild)
 }
 
 pub fn get_grandparents(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::GrandParent)
+    get_direct_relation(manager, character_id, GrandParent)
 }
 
 pub fn get_parents(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::Parent)
+    get_direct_relation(manager, character_id, Parent)
 }
 
 pub fn get_piblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::Pibling)
+    get_direct_relation(manager, character_id, Pibling)
 }
 
 pub fn get_siblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::Sibling)
+    get_direct_relation(manager, character_id, Sibling)
 }
 
 fn get_direct_relation(
