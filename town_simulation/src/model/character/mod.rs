@@ -1,6 +1,7 @@
 use crate::model::character::relation::Relation;
 use derive_more::Constructor;
 
+pub mod name;
 pub mod relation;
 
 #[derive(Constructor, Copy, Clone, Debug, Eq, PartialEq, Hash)]
