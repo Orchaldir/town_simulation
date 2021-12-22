@@ -1,4 +1,5 @@
 use crate::model::character::relation::family::FamilyRelationType;
+use crate::model::character::relation::RelationType;
 use crate::model::character::{CharacterId, CharacterMgr};
 use std::collections::HashSet;
 use FamilyRelationType::*;
@@ -17,7 +18,7 @@ where
 }
 
 pub fn get_children(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, Child)
+    get_relative(manager, character_id, Child)
 }
 
 pub fn get_shared_children(
@@ -32,40 +33,48 @@ pub fn get_shared_children(
 }
 
 pub fn get_cousins(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, Cousin)
+    get_relative(manager, character_id, Cousin)
 }
 
 pub fn get_niblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, Nibling)
+    get_relative(manager, character_id, Nibling)
 }
 
 pub fn get_grandchildren(
     manager: &CharacterMgr,
     character_id: CharacterId,
 ) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, GrandChild)
+    get_relative(manager, character_id, GrandChild)
 }
 
 pub fn get_grandparents(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, GrandParent)
+    get_relative(manager, character_id, GrandParent)
 }
 
 pub fn get_parents(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, Parent)
+    get_relative(manager, character_id, Parent)
 }
 
 pub fn get_piblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, Pibling)
+    get_relative(manager, character_id, Pibling)
 }
 
 pub fn get_siblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, Sibling)
+    get_relative(manager, character_id, Sibling)
+}
+
+fn get_relative(
+    manager: &CharacterMgr,
+    character_id: CharacterId,
+    relative_type: FamilyRelationType,
+) -> HashSet<CharacterId> {
+    get_direct_relation(manager, character_id, RelationType::Relative(relative_type))
 }
 
 fn get_direct_relation(
     manager: &CharacterMgr,
     character_id: CharacterId,
-    relation_type: FamilyRelationType,
+    relation_type: RelationType,
 ) -> HashSet<CharacterId> {
     if let Some(character) = manager.get(character_id) {
         return character

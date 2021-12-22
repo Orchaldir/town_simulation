@@ -19,7 +19,7 @@ pub enum FamilyRelationType {
 }
 
 impl FamilyRelationType {
-    pub fn reverse(&self) -> FamilyRelationType {
+    pub fn reverse(&self) -> Self {
         match self {
             GrandParent => GrandChild,
             Pibling => Nibling,

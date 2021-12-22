@@ -1,11 +1,11 @@
-use crate::model::character::relation::family::FamilyRelationType;
+use crate::model::character::relation::RelationType;
 use crate::model::character::{CharacterId, CharacterMgr};
 
 pub fn get_relation(
     manager: &CharacterMgr,
     from: CharacterId,
     to: CharacterId,
-) -> Option<FamilyRelationType> {
+) -> Option<RelationType> {
     if let Some(character) = manager.get(from) {
         return character
             .relations
@@ -25,6 +25,7 @@ pub fn is_relative(manager: &CharacterMgr, id0: CharacterId, id1: CharacterId) -
 mod tests {
     use super::*;
     use crate::model::character::relation::family::FamilyRelationType::*;
+    use crate::model::character::relation::RelationType::*;
     use crate::usecase::character::create_child;
 
     #[test]
@@ -46,23 +47,28 @@ mod tests {
         let sibling = create_child(&mut manager, father, mother);
         let cousin = create_child(&mut manager, husband_aunt, aunt);
 
-        assert(&manager, character, grandfather, Some(GrandParent));
-        assert(&manager, character, mother, Some(Parent));
-        assert(&manager, character, aunt, Some(Pibling));
+        assert(
+            &manager,
+            character,
+            grandfather,
+            Some(Relative(GrandParent)),
+        );
+        assert(&manager, character, mother, Some(Relative(Parent)));
+        assert(&manager, character, aunt, Some(Relative(Pibling)));
         assert(&manager, character, husband_aunt, None);
-        assert(&manager, character, sibling, Some(Sibling));
-        assert(&manager, character, cousin, Some(Cousin));
+        assert(&manager, character, sibling, Some(Relative(Sibling)));
+        assert(&manager, character, cousin, Some(Relative(Cousin)));
 
-        assert(&manager, grandmother, character, Some(GrandChild));
-        assert(&manager, father, character, Some(Child));
-        assert(&manager, aunt, character, Some(Nibling));
+        assert(&manager, grandmother, character, Some(Relative(GrandChild)));
+        assert(&manager, father, character, Some(Relative(Child)));
+        assert(&manager, aunt, character, Some(Relative(Nibling)));
     }
 
     fn assert(
         manager: &CharacterMgr,
         from: CharacterId,
         to: CharacterId,
-        result: Option<FamilyRelationType>,
+        result: Option<RelationType>,
     ) {
         assert_eq!(get_relation(&manager, from, to), result);
         assert_eq!(is_relative(&manager, from, to), result.is_some());

@@ -2,13 +2,14 @@ use crate::generation::name::character::CharacterNameGenerator;
 use crate::model::character::gender::Gender;
 use crate::model::character::name::CharacterName;
 use crate::model::character::relation::family::FamilyRelationType;
-use crate::model::character::relation::Relation;
+use crate::model::character::relation::{Relation, RelationType};
 use crate::model::character::{CharacterId, CharacterMgr};
 use crate::usecase::character::relation::get::{
     combine, get_children, get_parents, get_shared_children, get_siblings,
 };
 use std::collections::HashSet;
 use FamilyRelationType::*;
+use RelationType::*;
 
 pub mod relation;
 
@@ -24,11 +25,11 @@ pub fn create_child(
     let piblings = combine(&parents, |id| get_siblings(manager, id));
     let cousins = combine(&piblings, |id| get_children(manager, id));
 
-    add_relation(manager, child, &grandparents, GrandChild);
-    add_relation(manager, child, &cousins, Cousin);
-    add_relation(manager, child, &piblings, Nibling);
-    add_relation(manager, child, &siblings, Sibling);
-    add_relation(manager, child, &parents, Child);
+    add_relation(manager, child, &grandparents, Relative(GrandChild));
+    add_relation(manager, child, &cousins, Relative(Cousin));
+    add_relation(manager, child, &piblings, Relative(Nibling));
+    add_relation(manager, child, &siblings, Relative(Sibling));
+    add_relation(manager, child, &parents, Relative(Child));
 
     child
 }
@@ -64,7 +65,7 @@ fn add_relation(
     manager: &mut CharacterMgr,
     character: CharacterId,
     others: &HashSet<CharacterId>,
-    relation_type: FamilyRelationType,
+    relation_type: RelationType,
 ) {
     let relation = Relation::new(relation_type, character);
     let other_type = relation_type.reverse();
