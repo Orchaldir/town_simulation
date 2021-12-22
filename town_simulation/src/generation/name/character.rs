@@ -51,7 +51,7 @@ impl CharacterNameGenerator {
         )
     }
 
-    fn generate_family(&self, manager: &CharacterMgr, id: CharacterId) -> &str {
+    fn generate_family<'a>(&'a self, manager: &'a CharacterMgr, id: CharacterId) -> &'a str {
         get_parents(manager, id)
             .iter()
             .map(|parent_id| manager.get(*parent_id))
@@ -62,7 +62,7 @@ impl CharacterNameGenerator {
             .unwrap_or_else(|| self.generate_name(&self.family_names, id))
     }
 
-    fn generate_name(&self, generator: &NameGenerator, id: CharacterId) -> &str {
+    fn generate_name<'a>(&'a self, generator: &'a NameGenerator, id: CharacterId) -> &'a str {
         generator.get(id.id() as u32 * 1000000)
     }
 }
