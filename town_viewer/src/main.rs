@@ -163,7 +163,7 @@ fn init_characters(names: &CharacterNameGenerator) -> CharacterMgr {
     let aunt = init_daughter(&mut manager, names, grandfather0, grandmother0);
     let mother = init_daughter(&mut manager, names, grandfather1, grandmother1);
     init_son(&mut manager, names, grandfather1, grandmother1);
-    let husband_aunt = init_character(&mut manager, names, Female);
+    let husband_aunt = init_character(&mut manager, names, Male);
 
     marry(&mut manager, father, mother);
     marry(&mut manager, husband_aunt, aunt);
