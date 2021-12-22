@@ -1,6 +1,6 @@
+use crate::model::character::name::CharacterName;
 use crate::model::character::relation::Relation;
 use derive_more::Constructor;
-use crate::model::character::name::CharacterName;
 
 pub mod name;
 pub mod relation;

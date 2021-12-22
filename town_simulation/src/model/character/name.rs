@@ -17,6 +17,13 @@ impl CharacterName {
             last: last.into(),
         }
     }
+
+    pub fn sorted(&self) -> String {
+        match self {
+            CharacterName::Simple(name) => name.clone(),
+            CharacterName::Standard { first, last } => format!("{}, {}", last, first),
+        }
+    }
 }
 
 impl Display for CharacterName {
@@ -39,5 +46,14 @@ mod tests {
 
         assert_eq!(simple.to_string(), "Test");
         assert_eq!(standard.to_string(), "Aaa Bbb");
+    }
+
+    #[test]
+    fn test_sorted() {
+        let simple = CharacterName::simple("Test");
+        let standard = CharacterName::standard("Aaa", "Bbb");
+
+        assert_eq!(simple.sorted(), "Test");
+        assert_eq!(standard.sorted(), "Bbb, Aaa");
     }
 }
