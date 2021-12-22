@@ -18,6 +18,13 @@ impl CharacterName {
         }
     }
 
+    pub fn get_last(&self) -> Option<&str> {
+        match self {
+            CharacterName::Simple(..) => None,
+            CharacterName::Standard { last, .. } => Some(last),
+        }
+    }
+
     pub fn sorted(&self) -> String {
         match self {
             CharacterName::Simple(name) => name.clone(),

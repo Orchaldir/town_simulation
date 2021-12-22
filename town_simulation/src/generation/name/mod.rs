@@ -3,6 +3,8 @@ use derive_more::Constructor;
 use serde::Deserialize;
 use std::io;
 
+pub mod character;
+
 #[derive(Constructor, Debug, Deserialize)]
 pub struct Entry {
     name: String,
