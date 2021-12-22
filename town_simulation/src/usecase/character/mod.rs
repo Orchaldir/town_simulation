@@ -1,15 +1,15 @@
 use crate::generation::name::character::CharacterNameGenerator;
 use crate::model::character::gender::Gender;
 use crate::model::character::name::CharacterName;
-use crate::model::character::relation::family::FamilyRelationType;
+use crate::model::character::relation::family::RelativeType;
 use crate::model::character::relation::{Relation, RelationType};
 use crate::model::character::{CharacterId, CharacterMgr};
 use crate::usecase::character::relation::get::{
     combine, get_children, get_parents, get_shared_children, get_siblings,
 };
 use std::collections::HashSet;
-use FamilyRelationType::*;
 use RelationType::*;
+use RelativeType::*;
 
 pub mod relation;
 

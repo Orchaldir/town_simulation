@@ -2,10 +2,10 @@ use crate::model::character::gender::Gender;
 use crate::model::character::CharacterId;
 use derive_getters::Getters;
 use derive_more::Constructor;
-use FamilyRelationType::*;
+use RelativeType::*;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
-pub enum FamilyRelationType {
+pub enum RelativeType {
     GrandParent,
     /// Uncle or Aunt
     Pibling,
@@ -18,7 +18,7 @@ pub enum FamilyRelationType {
     GrandChild,
 }
 
-impl FamilyRelationType {
+impl RelativeType {
     pub fn reverse(&self) -> Self {
         match self {
             GrandParent => GrandChild,
@@ -61,6 +61,6 @@ impl FamilyRelationType {
 
 #[derive(Constructor, Getters, Copy, Clone, Debug, PartialEq)]
 pub struct Relation {
-    relation_type: FamilyRelationType,
+    relation_type: RelativeType,
     id: CharacterId,
 }

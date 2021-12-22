@@ -1,8 +1,8 @@
-use crate::model::character::relation::family::FamilyRelationType;
+use crate::model::character::relation::family::RelativeType;
 use crate::model::character::relation::RelationType;
 use crate::model::character::{CharacterId, CharacterMgr};
 use std::collections::HashSet;
-use FamilyRelationType::*;
+use RelativeType::*;
 
 pub fn combine<F>(character_ids: &HashSet<CharacterId>, mut f: F) -> HashSet<CharacterId>
 where
@@ -66,7 +66,7 @@ pub fn get_siblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSe
 fn get_relative(
     manager: &CharacterMgr,
     character_id: CharacterId,
-    relative_type: FamilyRelationType,
+    relative_type: RelativeType,
 ) -> HashSet<CharacterId> {
     get_direct_relation(manager, character_id, RelationType::Relative(relative_type))
 }

@@ -24,7 +24,7 @@ pub fn is_relative(manager: &CharacterMgr, id0: CharacterId, id1: CharacterId) -
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::character::relation::family::FamilyRelationType::*;
+    use crate::model::character::relation::family::RelativeType::*;
     use crate::model::character::relation::RelationType::*;
     use crate::usecase::character::create_child;
 

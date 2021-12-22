@@ -1,5 +1,5 @@
 use crate::model::character::gender::Gender;
-use crate::model::character::relation::family::FamilyRelationType;
+use crate::model::character::relation::family::RelativeType;
 use crate::model::character::CharacterId;
 use derive_getters::Getters;
 use derive_more::Constructor;
@@ -9,7 +9,7 @@ pub mod family;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum RelationType {
-    Relative(FamilyRelationType),
+    Relative(RelativeType),
 }
 
 impl RelationType {
