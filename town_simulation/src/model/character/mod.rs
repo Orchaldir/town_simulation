@@ -37,6 +37,22 @@ impl Character {
     pub fn id(&self) -> &CharacterId {
         &self.id
     }
+
+    pub fn name(&self) -> &CharacterName {
+        &self.name
+    }
+
+    pub fn set_name(&mut self, name: CharacterName) {
+        self.name = name;
+    }
+
+    pub fn gender(&self) -> &Gender {
+        &self.gender
+    }
+
+    pub fn set_gender(&mut self, gender: Gender) {
+        self.gender = gender;
+    }
 }
 
 #[derive(Default, Debug)]

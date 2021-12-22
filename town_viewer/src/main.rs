@@ -5,9 +5,11 @@ use rocket::fs::FileServer;
 use rocket::response::content::Html;
 use rocket::State;
 use std::sync::Mutex;
+use town_simulation::model::character::gender::Gender;
+use town_simulation::model::character::gender::Gender::{Female, Male};
 use town_simulation::model::character::relation::Relation;
 use town_simulation::model::character::{Character, CharacterId, CharacterMgr};
-use town_simulation::usecase::character::create_child;
+use town_simulation::usecase::character::{create_child, set_gender};
 
 struct ViewerData {
     characters: Mutex<CharacterMgr>,
@@ -135,23 +137,52 @@ fn init_characters() -> CharacterMgr {
     let mut manager = CharacterMgr::default();
 
     // generation 0
-    let grandfather0 = manager.create();
-    let grandmother0 = manager.create();
-    let grandfather1 = manager.create();
-    let grandmother1 = manager.create();
+    let grandfather0 = init_character(&mut manager, Male);
+    let grandmother0 = init_character(&mut manager, Female);
+    let grandfather1 = init_character(&mut manager, Male);
+    let grandmother1 = init_character(&mut manager, Female);
 
     // generation 1
-    let father = create_child(&mut manager, grandfather0, grandmother0);
-    let aunt = create_child(&mut manager, grandfather0, grandmother0);
-    let mother = create_child(&mut manager, grandfather1, grandmother1);
-    create_child(&mut manager, grandfather1, grandmother1);
-    let husband_aunt = manager.create();
+    let father = init_son(&mut manager, grandfather0, grandmother0);
+    let aunt = init_daughter(&mut manager, grandfather0, grandmother0);
+    let mother = init_daughter(&mut manager, grandfather1, grandmother1);
+    init_son(&mut manager, grandfather1, grandmother1);
+    let husband_aunt = init_character(&mut manager, Female);
 
     // generation 2
-    create_child(&mut manager, father, mother);
-    create_child(&mut manager, father, mother);
-    create_child(&mut manager, father, mother);
-    create_child(&mut manager, husband_aunt, aunt);
+    init_child(&mut manager, father, mother, Male);
+    init_child(&mut manager, father, mother, Female);
+    init_child(&mut manager, father, mother, Male);
+    init_child(&mut manager, husband_aunt, aunt, Female);
 
     manager
+}
+
+fn init_character(manager: &mut CharacterMgr, gender: Gender) -> CharacterId {
+    let id = manager.create();
+    set_gender(manager, id, gender);
+    id
+}
+
+fn init_son(manager: &mut CharacterMgr, father: CharacterId, mother: CharacterId) -> CharacterId {
+    init_child(manager, father, mother, Male)
+}
+
+fn init_daughter(
+    manager: &mut CharacterMgr,
+    father: CharacterId,
+    mother: CharacterId,
+) -> CharacterId {
+    init_child(manager, father, mother, Female)
+}
+
+fn init_child(
+    manager: &mut CharacterMgr,
+    father: CharacterId,
+    mother: CharacterId,
+    gender: Gender,
+) -> CharacterId {
+    let id = create_child(manager, father, mother);
+    set_gender(manager, id, gender);
+    id
 }

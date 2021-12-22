@@ -1,3 +1,4 @@
+use crate::model::character::gender::Gender;
 use crate::model::character::relation::{Relation, RelationType};
 use crate::model::character::{CharacterId, CharacterMgr};
 use crate::usecase::character::relation::get::{
@@ -27,6 +28,20 @@ pub fn create_child(
     add_relation(manager, child, &parents, Child);
 
     child
+}
+
+pub fn set_gender(manager: &mut CharacterMgr, id: CharacterId, gender: Gender) {
+    let character = manager.get_mut(id).unwrap();
+    character.set_gender(gender);
+}
+
+pub fn set_gender_based_on_id(manager: &mut CharacterMgr, id: CharacterId) {
+    let gender = if id.id() % 2 == 0 {
+        Gender::Male
+    } else {
+        Gender::Female
+    };
+    set_gender(manager, id, gender);
 }
 
 fn add_relation(
