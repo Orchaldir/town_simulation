@@ -1,7 +1,9 @@
+use crate::model::character::gender::Gender;
 use crate::model::character::name::CharacterName;
 use crate::model::character::relation::Relation;
 use derive_more::Constructor;
 
+pub mod gender;
 pub mod name;
 pub mod relation;
 
@@ -18,6 +20,7 @@ impl CharacterId {
 pub struct Character {
     id: CharacterId,
     name: CharacterName,
+    gender: Gender,
     pub relations: Vec<Relation>,
 }
 
@@ -26,6 +29,7 @@ impl Character {
         Character {
             id,
             name: CharacterName::simple(id.0.to_string()),
+            gender: Gender::default(),
             relations: Vec::new(),
         }
     }

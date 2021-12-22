@@ -1,3 +1,4 @@
+use crate::model::character::gender::Gender;
 use crate::model::character::CharacterId;
 use derive_getters::Getters;
 use derive_more::Constructor;
@@ -27,6 +28,32 @@ impl RelationType {
             RelationType::Sibling => RelationType::Sibling,
             RelationType::Child => RelationType::Parent,
             RelationType::GrandChild => RelationType::GrandParent,
+        }
+    }
+
+    pub fn get_gender_specific_string(&self, gender: Gender) -> &str {
+        if gender == Gender::Male {
+            match self {
+                RelationType::GrandParent => "grandfather",
+                RelationType::Pibling => "uncle",
+                RelationType::Nibling => "nephew",
+                RelationType::Parent => "father",
+                RelationType::Cousin => "cousin",
+                RelationType::Sibling => "brother",
+                RelationType::Child => "son",
+                RelationType::GrandChild => "grandson",
+            }
+        } else {
+            match self {
+                RelationType::GrandParent => "grandmother",
+                RelationType::Pibling => "aunt",
+                RelationType::Nibling => "niece",
+                RelationType::Parent => "mother",
+                RelationType::Cousin => "cousin",
+                RelationType::Sibling => "sister",
+                RelationType::Child => "daughter",
+                RelationType::GrandChild => "granddaughter",
+            }
         }
     }
 }
