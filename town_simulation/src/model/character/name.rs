@@ -63,4 +63,13 @@ mod tests {
         assert_eq!(simple.sorted(), "Test");
         assert_eq!(standard.sorted(), "Bbb, Aaa");
     }
+
+    #[test]
+    fn test_get_last() {
+        let simple = CharacterName::simple("Test");
+        let standard = CharacterName::standard("Aaa", "Bbb");
+
+        assert_eq!(simple.get_last(), None);
+        assert_eq!(standard.get_last(), Some("Bbb"));
+    }
 }
