@@ -1,6 +1,7 @@
 use derive_more::Constructor;
+use serde::Deserialize;
 
-#[derive(Constructor)]
+#[derive(Constructor, Debug, Deserialize)]
 pub struct Entry {
     name: String,
     value: u32,
@@ -24,6 +25,19 @@ impl NameGenerator {
             entries,
             total_value,
         }
+    }
+
+    pub fn read(path: &str) -> Self {
+        let mut reader =
+            csv::Reader::from_path(path).unwrap_or_else(|_| panic!("Cannot open file {}", path));
+        let mut entries = Vec::new();
+
+        for (line, record) in reader.deserialize().enumerate() {
+            let entry: Entry = record.unwrap_or_else(|_| panic!("Cannot read line {}", line));
+            entries.push(entry);
+        }
+
+        Self::new(entries)
     }
 
     pub fn get(&self, index: u32) -> &str {
