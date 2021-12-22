@@ -67,6 +67,8 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
  </head>
  <body>
   <h1>Character {}</h1>
+  <h2>General</h2>
+  <p><b>Gender:</b> {:?}</p>
   <h2>Relations</h2>
   <ul>
     {}
@@ -76,7 +78,8 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
 </html>
 ",
             character.id().id(),
-            show_relations(character),
+            character.gender(),
+            show_relations(&lock, character),
         ))
     } else {
         Html(format!(
@@ -96,20 +99,23 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
     }
 }
 
-fn show_relations(character: &Character) -> String {
+fn show_relations(manager: &CharacterMgr, character: &Character) -> String {
     let vector: Vec<String> = character
         .relations
         .iter()
-        .map(|r| show_relation(r))
+        .map(|r| show_relation(manager, r))
         .collect();
 
     vector.join("\n")
 }
 
-fn show_relation(relation: &Relation) -> String {
+fn show_relation(manager: &CharacterMgr, relation: &Relation) -> String {
+    let other = manager.get(*relation.id()).unwrap();
     format!(
-        "   <li>{0:?}: <a href=\"/{1}\">Character {1}</a></li>",
-        relation.relation_type(),
+        "   <li><a href=\"/{1}\">Character {1}</a> ({0})</li>",
+        relation
+            .relation_type()
+            .get_gender_specific_string(*other.gender()),
         relation.id().id(),
     )
 }
