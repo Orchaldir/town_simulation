@@ -1,26 +1,37 @@
+use derive_more::Constructor;
+
+#[derive(Constructor)]
+pub struct Entry {
+    name: String,
+    value: u32,
+}
+
 pub struct NameGenerator {
-    names: Vec<(String, u32)>,
+    entries: Vec<Entry>,
     total_value: u32,
 }
 
 impl NameGenerator {
-    pub fn new(mut names: Vec<(String, u32)>) -> Self {
+    pub fn new(mut entries: Vec<Entry>) -> Self {
         let mut total_value = 0u32;
 
-        for (_name, value) in names.iter_mut() {
-            total_value += *value;
-            *value = total_value;
+        for entry in entries.iter_mut() {
+            total_value += entry.value;
+            entry.value = total_value;
         }
 
-        Self { names, total_value }
+        Self {
+            entries,
+            total_value,
+        }
     }
 
     pub fn get(&self, index: u32) -> &str {
         let index = index % self.total_value;
 
-        for (name, value) in &self.names {
-            if index < *value {
-                return name;
+        for entry in &self.entries {
+            if index < entry.value {
+                return &entry.name;
             }
         }
 
@@ -34,7 +45,10 @@ mod tests {
 
     #[test]
     fn test_get() {
-        let generator = NameGenerator::new(vec![("A".to_string(), 3), ("B".to_string(), 2)]);
+        let generator = NameGenerator::new(vec![
+            Entry::new("A".to_string(), 3),
+            Entry::new("B".to_string(), 2),
+        ]);
 
         assert_eq!(generator.get(0), "A");
         assert_eq!(generator.get(1), "A");
