@@ -5,9 +5,12 @@ use rocket::fs::FileServer;
 use rocket::response::content::Html;
 use rocket::State;
 use std::sync::Mutex;
+use town_simulation::generation::name::character::CharacterNameGenerator;
+use town_simulation::model::character::gender::Gender;
+use town_simulation::model::character::gender::Gender::{Female, Male};
 use town_simulation::model::character::relation::Relation;
 use town_simulation::model::character::{Character, CharacterId, CharacterMgr};
-use town_simulation::usecase::character::create_child;
+use town_simulation::usecase::character::{create_child, set_gender, set_generated_name};
 
 struct ViewerData {
     characters: Mutex<CharacterMgr>,
@@ -47,8 +50,9 @@ fn get_character_list(characters: &[Character]) -> String {
 
 fn get_character_in_list(character: &Character) -> String {
     format!(
-        "   <li><a href=\"/{0}\">Character {0}</a></li>",
-        character.id().id()
+        "   <li><a href=\"/{}\">{}</a></li>",
+        character.id().id(),
+        character.name(),
     )
 }
 
@@ -64,7 +68,10 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
   <link rel=\"stylesheet\" href=\"static/style.css\">
  </head>
  <body>
-  <h1>Character {}</h1>
+  <h1>{}</h1>
+  <h2>General</h2>
+  <p><b>Id:</b> {}</p>
+  <p><b>Gender:</b> {:?}</p>
   <h2>Relations</h2>
   <ul>
     {}
@@ -73,8 +80,10 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
  </body>
 </html>
 ",
+            character.name(),
             character.id().id(),
-            show_relations(character),
+            character.gender(),
+            show_relations(&lock, character),
         ))
     } else {
         Html(format!(
@@ -94,27 +103,32 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
     }
 }
 
-fn show_relations(character: &Character) -> String {
+fn show_relations(manager: &CharacterMgr, character: &Character) -> String {
     let vector: Vec<String> = character
         .relations
         .iter()
-        .map(|r| show_relation(r))
+        .map(|r| show_relation(manager, r))
         .collect();
 
     vector.join("\n")
 }
 
-fn show_relation(relation: &Relation) -> String {
+fn show_relation(manager: &CharacterMgr, relation: &Relation) -> String {
+    let other = manager.get(*relation.id()).unwrap();
     format!(
-        "   <li>{0:?}: <a href=\"/{1}\">Character {1}</a></li>",
-        relation.relation_type(),
+        "   <li><a href=\"/{}\">{}</a> ({})</li>",
         relation.id().id(),
+        other.name(),
+        relation
+            .relation_type()
+            .get_gender_specific_string(*other.gender()),
     )
 }
 
 #[rocket::main]
 async fn main() {
-    let characters = init_characters();
+    let name_generator = CharacterNameGenerator::load("resources/names/english");
+    let characters = init_characters(&name_generator);
     let data = ViewerData {
         characters: Mutex::new(characters),
     };
@@ -131,27 +145,69 @@ async fn main() {
     };
 }
 
-fn init_characters() -> CharacterMgr {
+fn init_characters(names: &CharacterNameGenerator) -> CharacterMgr {
     let mut manager = CharacterMgr::default();
 
     // generation 0
-    let grandfather0 = manager.create();
-    let grandmother0 = manager.create();
-    let grandfather1 = manager.create();
-    let grandmother1 = manager.create();
+    let grandfather0 = init_character(&mut manager, names, Male);
+    let grandmother0 = init_character(&mut manager, names, Female);
+    let grandfather1 = init_character(&mut manager, names, Male);
+    let grandmother1 = init_character(&mut manager, names, Female);
 
     // generation 1
-    let father = create_child(&mut manager, grandfather0, grandmother0);
-    let aunt = create_child(&mut manager, grandfather0, grandmother0);
-    let mother = create_child(&mut manager, grandfather1, grandmother1);
-    create_child(&mut manager, grandfather1, grandmother1);
-    let husband_aunt = manager.create();
+    let father = init_son(&mut manager, names, grandfather0, grandmother0);
+    let aunt = init_daughter(&mut manager, names, grandfather0, grandmother0);
+    let mother = init_daughter(&mut manager, names, grandfather1, grandmother1);
+    init_son(&mut manager, names, grandfather1, grandmother1);
+    let husband_aunt = init_character(&mut manager, names, Female);
 
     // generation 2
-    create_child(&mut manager, father, mother);
-    create_child(&mut manager, father, mother);
-    create_child(&mut manager, father, mother);
-    create_child(&mut manager, husband_aunt, aunt);
+    init_child(&mut manager, names, father, mother, Male);
+    init_child(&mut manager, names, father, mother, Female);
+    init_child(&mut manager, names, father, mother, Male);
+    init_child(&mut manager, names, husband_aunt, aunt, Female);
 
     manager
+}
+
+fn init_character(
+    manager: &mut CharacterMgr,
+    name_generator: &CharacterNameGenerator,
+    gender: Gender,
+) -> CharacterId {
+    let id = manager.create();
+    set_gender(manager, id, gender);
+    set_generated_name(manager, name_generator, id);
+    id
+}
+
+fn init_son(
+    manager: &mut CharacterMgr,
+    name_generator: &CharacterNameGenerator,
+    father: CharacterId,
+    mother: CharacterId,
+) -> CharacterId {
+    init_child(manager, name_generator, father, mother, Male)
+}
+
+fn init_daughter(
+    manager: &mut CharacterMgr,
+    name_generator: &CharacterNameGenerator,
+    father: CharacterId,
+    mother: CharacterId,
+) -> CharacterId {
+    init_child(manager, name_generator, father, mother, Female)
+}
+
+fn init_child(
+    manager: &mut CharacterMgr,
+    name_generator: &CharacterNameGenerator,
+    father: CharacterId,
+    mother: CharacterId,
+    gender: Gender,
+) -> CharacterId {
+    let id = create_child(manager, father, mother);
+    set_gender(manager, id, gender);
+    set_generated_name(manager, name_generator, id);
+    id
 }
