@@ -1,5 +1,5 @@
 use crate::model::character::relation::family::RelativeType;
-use crate::model::character::relation::RelationType;
+use crate::model::character::relation::{Relation, RelationType};
 use crate::model::character::{CharacterId, CharacterMgr};
 use std::collections::HashSet;
 use RelativeType::*;
@@ -61,6 +61,26 @@ pub fn get_piblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSe
 
 pub fn get_siblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
     get_relative(manager, character_id, Sibling)
+}
+
+pub fn get_relation_of_relatives(
+    manager: &CharacterMgr,
+    character_id: CharacterId,
+) -> Vec<&Relation> {
+    manager
+        .get(character_id)
+        .unwrap()
+        .relations
+        .iter()
+        .filter(|&relation| relation.relation_type().is_relative())
+        .collect()
+}
+
+pub fn get_relatives(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
+    get_relation_of_relatives(manager, character_id)
+        .iter()
+        .map(|&relation| *relation.id())
+        .collect()
 }
 
 fn get_relative(

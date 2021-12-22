@@ -10,6 +10,7 @@ pub mod family;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum RelationType {
+    InLaw(RelativeType),
     Relative(RelativeType),
     Spouse,
 }
@@ -17,21 +18,24 @@ pub enum RelationType {
 impl RelationType {
     pub fn reverse(&self) -> Self {
         match self {
+            InLaw(relative_type) => Relative(relative_type.reverse()),
             Relative(relative_type) => Relative(relative_type.reverse()),
             Spouse => Spouse,
         }
     }
 
-    pub fn get_gender_specific_string(&self, gender: Gender) -> &str {
+    pub fn is_relative(&self) -> bool {
+        matches!(self, Relative(..))
+    }
+
+    pub fn get_gender_specific_string(&self, gender: Gender) -> String {
         match self {
-            Relative(relative_type) => relative_type.get_gender_specific_string(gender),
-            Spouse => {
-                if gender == Male {
-                    "husband"
-                } else {
-                    "wife"
-                }
-            }
+            InLaw(relative_type) => format!(
+                "{}-in-law",
+                relative_type.get_gender_specific_string(gender)
+            ),
+            Relative(relative_type) => relative_type.get_gender_specific_string(gender).to_string(),
+            Spouse => if gender == Male { "husband" } else { "wife" }.to_string(),
         }
     }
 }
@@ -40,4 +44,13 @@ impl RelationType {
 pub struct Relation {
     relation_type: RelationType,
     id: CharacterId,
+}
+
+impl Relation {
+    pub fn to_in_law(&self) -> Option<Self> {
+        match self.relation_type {
+            Relative(relative_type) => Some(Self::new(InLaw(relative_type), self.id)),
+            _ => None,
+        }
+    }
 }
