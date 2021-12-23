@@ -35,19 +35,22 @@ fn get_overview(data: &State<ViewerData>) -> Html<String> {
  <body>
   <h1>Town Simulation</h1>
   <h2>Overview</h2>
-  <p>Characters: <a href=\"/character\">{}</a></p>
+  <p><b>Year:</b> {}</p>
+  <p><b>Characters</b>: <a href=\"/character\">{}</a></p>
   <h2>Actions</h2>
   <p><a href=\"/simulate\">Simulate</a></p>
  </body>
 </html>
 ",
+        data.date.get_year(),
         data.character_manager.get_all().len()
     ))
 }
 
 #[get("/simulate")]
-fn simulate() -> Redirect {
-    simulate_year();
+fn simulate(data: &State<ViewerData>) -> Redirect {
+    let mut data = data.data.lock().expect("lock shared data");
+    simulate_year(&mut data);
     Redirect::to(uri!(get_overview()))
 }
 
