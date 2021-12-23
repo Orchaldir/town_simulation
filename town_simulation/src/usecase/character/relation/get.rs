@@ -110,7 +110,7 @@ fn get_direct_relation(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::usecase::character::birth::create_child;
+    use crate::usecase::character::birth::birth;
 
     #[test]
     fn test_get_relatives() {
@@ -123,17 +123,17 @@ mod tests {
         let grandmother1 = manager.create();
 
         // generation 1
-        let father = create_child(&mut manager, grandfather0, grandmother0);
-        let aunt = create_child(&mut manager, grandfather0, grandmother0);
-        let mother = create_child(&mut manager, grandfather1, grandmother1);
-        let uncle = create_child(&mut manager, grandfather1, grandmother1);
+        let father = birth(&mut manager, grandfather0, grandmother0);
+        let aunt = birth(&mut manager, grandfather0, grandmother0);
+        let mother = birth(&mut manager, grandfather1, grandmother1);
+        let uncle = birth(&mut manager, grandfather1, grandmother1);
         let husband_aunt = manager.create();
 
         // generation 2
-        let character0 = create_child(&mut manager, father, mother);
-        let character1 = create_child(&mut manager, father, mother);
-        let character2 = create_child(&mut manager, father, mother);
-        let cousin = create_child(&mut manager, husband_aunt, aunt);
+        let character0 = birth(&mut manager, father, mother);
+        let character1 = birth(&mut manager, father, mother);
+        let character2 = birth(&mut manager, father, mother);
+        let cousin = birth(&mut manager, husband_aunt, aunt);
 
         // grandchildren of generation 0
         assert(

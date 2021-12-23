@@ -4,11 +4,7 @@ use crate::model::character::{CharacterId, CharacterMgr};
 use crate::usecase::character::add_relation;
 use crate::usecase::character::relation::get::*;
 
-pub fn create_child(
-    manager: &mut CharacterMgr,
-    father: CharacterId,
-    mother: CharacterId,
-) -> CharacterId {
+pub fn birth(manager: &mut CharacterMgr, father: CharacterId, mother: CharacterId) -> CharacterId {
     let parents = [father, mother].into();
     let child = manager.create();
     let siblings = get_shared_children(manager, father, mother);
