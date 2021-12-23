@@ -1,10 +1,9 @@
 use crate::model::character::relation::family::RelativeType;
 use crate::model::character::relation::family::RelativeType::*;
-use crate::model::character::relation::Relation;
 use crate::model::character::relation::RelationType::*;
 use crate::model::character::{CharacterId, CharacterMgr};
-use crate::usecase::character::add_relation;
 use crate::usecase::character::relation::get::*;
+use crate::usecase::character::{add_relation, add_relations};
 use std::collections::HashSet;
 
 pub fn birth(manager: &mut CharacterMgr, father: CharacterId, mother: CharacterId) -> CharacterId {
@@ -15,11 +14,11 @@ pub fn birth(manager: &mut CharacterMgr, father: CharacterId, mother: CharacterI
     let piblings = combine(&parents, |id| get_siblings(manager, id));
     let cousins = combine(&piblings, |id| get_children(manager, id));
 
-    add_relation(manager, child, &grandparents, Relative(GrandChild));
-    add_relation(manager, child, &cousins, Relative(Cousin));
-    add_relation(manager, child, &piblings, Relative(Nibling));
-    add_relation(manager, child, &siblings, Relative(Sibling));
-    add_relation(manager, child, &parents, Relative(Child));
+    add_relations(manager, child, &grandparents, Relative(GrandChild));
+    add_relations(manager, child, &cousins, Relative(Cousin));
+    add_relations(manager, child, &piblings, Relative(Nibling));
+    add_relations(manager, child, &siblings, Relative(Sibling));
+    add_relations(manager, child, &parents, Relative(Child));
 
     let mut relatives = HashSet::new();
     relatives.extend(parents.clone());
@@ -36,28 +35,19 @@ pub fn birth(manager: &mut CharacterMgr, father: CharacterId, mother: CharacterI
     child
 }
 
-pub fn add_in_laws(
+fn add_in_laws(
     manager: &mut CharacterMgr,
     character: CharacterId,
     targets: &HashSet<CharacterId>,
     relatives: &HashSet<CharacterId>,
     relative_type: RelativeType,
 ) {
-    let relation = Relation::new(InLaw(relative_type), character);
-    let other_type = InLaw(relative_type.reverse());
+    let relation_type = InLaw(relative_type);
 
     for target in targets {
         for spouse in get_spouses(manager, *target) {
             if !relatives.contains(&spouse) {
-                manager.get_mut(spouse).unwrap().relations.push(relation);
-
-                let other_relation = Relation::new(other_type, spouse);
-
-                manager
-                    .get_mut(character)
-                    .unwrap()
-                    .relations
-                    .push(other_relation);
+                add_relation(manager, character, spouse, relation_type);
             }
         }
     }

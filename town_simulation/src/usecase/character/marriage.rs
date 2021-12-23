@@ -1,13 +1,13 @@
 use crate::model::character::relation::Relation;
 use crate::model::character::relation::RelationType::Spouse;
 use crate::model::character::{CharacterId, CharacterMgr};
-use crate::usecase::character::add_relation;
+use crate::usecase::character::add_relations;
 use crate::usecase::character::relation::get::get_relation_of_relatives;
 
 pub fn marry(manager: &mut CharacterMgr, id0: CharacterId, id1: CharacterId) {
     update_in_laws(manager, id0, id1);
     update_in_laws(manager, id1, id0);
-    add_relation(manager, id0, &vec![id1].into_iter().collect(), Spouse);
+    add_relations(manager, id0, &vec![id1].into_iter().collect(), Spouse);
     update_names(manager, id0, id1);
 }
 

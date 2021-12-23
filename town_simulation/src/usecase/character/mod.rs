@@ -36,24 +36,32 @@ pub fn set_gender_based_on_id(manager: &mut CharacterMgr, id: CharacterId) {
     set_gender(manager, id, gender);
 }
 
-pub fn add_relation(
+pub fn add_relations(
     manager: &mut CharacterMgr,
     character: CharacterId,
     others: &HashSet<CharacterId>,
     relation_type: RelationType,
 ) {
-    let relation = Relation::new(relation_type, character);
-    let other_type = relation_type.reverse();
-
     for other in others {
-        manager.get_mut(*other).unwrap().relations.push(relation);
-
-        let other_relation = Relation::new(other_type, *other);
-
-        manager
-            .get_mut(character)
-            .unwrap()
-            .relations
-            .push(other_relation);
+        add_relation(manager, character, *other, relation_type);
     }
+}
+
+pub fn add_relation(
+    manager: &mut CharacterMgr,
+    character0: CharacterId,
+    character1: CharacterId,
+    relation_type: RelationType,
+) {
+    manager
+        .get_mut(character1)
+        .unwrap()
+        .relations
+        .push(Relation::new(relation_type, character0));
+
+    manager
+        .get_mut(character0)
+        .unwrap()
+        .relations
+        .push(Relation::new(relation_type.reverse(), character1));
 }
