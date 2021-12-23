@@ -26,10 +26,11 @@ fn update_in_laws(manager: &mut CharacterMgr, from: CharacterId, to: CharacterId
 fn update_names(manager: &mut CharacterMgr, id0: CharacterId, id1: CharacterId) {
     if let Some(last_name) = manager.get(id0).map(|c| c.name().get_last()).flatten() {
         let last_name = last_name.to_string();
-        manager.get_mut(id1).map(|character| {
+
+        if let Some(character) = manager.get_mut(id1) {
             let name = character.name().marry(last_name);
             character.set_name(name);
-        });
+        }
     }
 }
 

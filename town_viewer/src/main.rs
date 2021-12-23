@@ -10,7 +10,9 @@ use town_simulation::model::character::gender::Gender;
 use town_simulation::model::character::gender::Gender::{Female, Male};
 use town_simulation::model::character::relation::Relation;
 use town_simulation::model::character::{Character, CharacterId, CharacterMgr};
+use town_simulation::model::time::Date;
 use town_simulation::usecase::character::birth::birth;
+use town_simulation::usecase::character::death::death;
 use town_simulation::usecase::character::marriage::marry;
 use town_simulation::usecase::character::{set_gender, set_generated_name};
 
@@ -37,25 +39,33 @@ fn get_characters(data: &State<ViewerData>) -> Html<String> {
 </html>
 ",
         lock.get_all().len(),
-        get_character_list(lock.get_all()),
+        show_character_list(lock.get_all()),
     ))
 }
 
-fn get_character_list(characters: &[Character]) -> String {
+fn show_character_list(characters: &[Character]) -> String {
     let vector: Vec<String> = characters
         .iter()
-        .map(|c| get_character_in_list(c))
+        .map(|c| show_character_in_list(c))
         .collect();
 
     vector.join("\n")
 }
 
-fn get_character_in_list(character: &Character) -> String {
+fn show_character_in_list(character: &Character) -> String {
     format!(
         "   <li><a href=\"/{}\">{}</a></li>",
         character.id().id(),
-        character.name(),
+        show_character_name(character),
     )
+}
+
+fn show_character_name(character: &Character) -> String {
+    if character.is_alive() {
+        character.name().to_string()
+    } else {
+        format!("<del>{}</del>", character.name())
+    }
 }
 
 #[get("/<id>")]
@@ -74,6 +84,7 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
   <h2>General</h2>
   <p><b>Id:</b> {}</p>
   <p><b>Gender:</b> {:?}</p>
+  <p><b>Birth Date:</b> {}</p>{}
   <h2>Relations</h2>
   <ul>
     {}
@@ -85,6 +96,8 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
             character.name(),
             character.id().id(),
             character.gender(),
+            character.birth_date().get_year(),
+            show_death(character),
             show_relations(&lock, character),
         ))
     } else {
@@ -105,6 +118,14 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
     }
 }
 
+fn show_death(character: &Character) -> String {
+    if let Some(date) = character.death_date() {
+        format!("\n<p><b>Death Date:</b> {}</p>", date.get_year())
+    } else {
+        "".to_string()
+    }
+}
+
 fn show_relations(manager: &CharacterMgr, character: &Character) -> String {
     let vector: Vec<String> = character
         .relations
@@ -120,7 +141,7 @@ fn show_relation(manager: &CharacterMgr, relation: &Relation) -> String {
     format!(
         "   <li><a href=\"/{}\">{}</a> ({})</li>",
         relation.id().id(),
-        other.name(),
+        show_character_name(other),
         relation
             .relation_type()
             .get_gender_specific_string(*other.gender()),
@@ -174,6 +195,8 @@ fn init_characters(names: &CharacterNameGenerator) -> CharacterMgr {
     init_child(&mut manager, names, father, mother, Female);
     init_child(&mut manager, names, father, mother, Male);
     init_child(&mut manager, names, husband_aunt, aunt, Female);
+
+    death(&mut manager, grandfather0, Date::new(3));
 
     manager
 }

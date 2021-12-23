@@ -1,6 +1,7 @@
 use crate::model::character::gender::Gender;
 use crate::model::character::name::CharacterName;
 use crate::model::character::relation::Relation;
+use crate::model::time::Date;
 use derive_more::Constructor;
 
 pub mod gender;
@@ -21,6 +22,8 @@ pub struct Character {
     id: CharacterId,
     name: CharacterName,
     gender: Gender,
+    birth_date: Date,
+    death_date: Option<Date>,
     pub relations: Vec<Relation>,
 }
 
@@ -30,6 +33,8 @@ impl Character {
             id,
             name: CharacterName::simple(id.0.to_string()),
             gender: Gender::default(),
+            birth_date: Date::default(),
+            death_date: None,
             relations: Vec::new(),
         }
     }
@@ -52,6 +57,34 @@ impl Character {
 
     pub fn set_gender(&mut self, gender: Gender) {
         self.gender = gender;
+    }
+
+    pub fn birth_date(&self) -> &Date {
+        &self.birth_date
+    }
+
+    pub fn set_birth_date(&mut self, birth_date: Date) {
+        self.birth_date = birth_date;
+    }
+
+    pub fn is_alive(&self) -> bool {
+        self.death_date.is_none()
+    }
+
+    pub fn is_dead(&self) -> bool {
+        self.death_date.is_some()
+    }
+
+    pub fn death_date(&self) -> &Option<Date> {
+        &self.death_date
+    }
+
+    pub fn set_death_date(&mut self, death_date: Date) {
+        if self.is_dead() {
+            panic!("Character is already dead!");
+        }
+
+        self.death_date = Some(death_date);
     }
 }
 
