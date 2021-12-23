@@ -63,7 +63,20 @@ pub fn get_siblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSe
     get_relative(manager, character_id, Sibling)
 }
 
-pub fn get_relation_of_relatives(
+pub fn get_relation_to_in_laws(
+    manager: &CharacterMgr,
+    character_id: CharacterId,
+) -> Vec<&Relation> {
+    manager
+        .get(character_id)
+        .unwrap()
+        .relations
+        .iter()
+        .filter(|&relation| relation.relation_type().is_in_law())
+        .collect()
+}
+
+pub fn get_relation_to_relatives(
     manager: &CharacterMgr,
     character_id: CharacterId,
 ) -> Vec<&Relation> {
@@ -77,7 +90,7 @@ pub fn get_relation_of_relatives(
 }
 
 pub fn get_relatives(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_relation_of_relatives(manager, character_id)
+    get_relation_to_relatives(manager, character_id)
         .iter()
         .map(|&relation| *relation.id())
         .collect()

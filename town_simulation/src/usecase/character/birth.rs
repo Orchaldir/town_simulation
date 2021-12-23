@@ -31,6 +31,7 @@ pub fn birth(manager: &mut CharacterMgr, father: CharacterId, mother: CharacterI
     add_in_laws(manager, child, &cousins, &relatives, Cousin);
     add_in_laws(manager, child, &piblings, &relatives, Nibling);
     add_in_laws(manager, child, &siblings, &relatives, Sibling);
+    add_in_laws(manager, child, &parents, &relatives, Child);
 
     child
 }

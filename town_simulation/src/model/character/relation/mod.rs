@@ -18,10 +18,14 @@ pub enum RelationType {
 impl RelationType {
     pub fn reverse(&self) -> Self {
         match self {
-            InLaw(relative_type) => Relative(relative_type.reverse()),
+            InLaw(relative_type) => InLaw(relative_type.reverse()),
             Relative(relative_type) => Relative(relative_type.reverse()),
             Spouse => Spouse,
         }
+    }
+
+    pub fn is_in_law(&self) -> bool {
+        matches!(self, InLaw(..))
     }
 
     pub fn is_relative(&self) -> bool {

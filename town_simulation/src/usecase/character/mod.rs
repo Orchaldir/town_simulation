@@ -9,6 +9,10 @@ pub mod birth;
 pub mod marriage;
 pub mod relation;
 
+pub fn get_name(manager: &CharacterMgr, id: CharacterId) -> &CharacterName {
+    manager.get(id).unwrap().name()
+}
+
 pub fn set_name(manager: &mut CharacterMgr, id: CharacterId, name: CharacterName) {
     let character = manager.get_mut(id).unwrap();
     character.set_name(name);
