@@ -83,7 +83,8 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
   <h1>{}</h1>
   <h2>General</h2>
   <p><b>Id:</b> {}</p>
-  <p><b>Gender:</b> {:?}</p>{}
+  <p><b>Gender:</b> {:?}</p>
+  <p><b>Birth Date:</b> {}</p>{}
   <h2>Relations</h2>
   <ul>
     {}
@@ -95,6 +96,7 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
             character.name(),
             character.id().id(),
             character.gender(),
+            character.birth_date().get_year(),
             show_death(character),
             show_relations(&lock, character),
         ))

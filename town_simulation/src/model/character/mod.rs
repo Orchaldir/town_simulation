@@ -22,6 +22,7 @@ pub struct Character {
     id: CharacterId,
     name: CharacterName,
     gender: Gender,
+    birth_date: Date,
     death_date: Option<Date>,
     pub relations: Vec<Relation>,
 }
@@ -32,6 +33,7 @@ impl Character {
             id,
             name: CharacterName::simple(id.0.to_string()),
             gender: Gender::default(),
+            birth_date: Date::default(),
             death_date: None,
             relations: Vec::new(),
         }
@@ -55,6 +57,14 @@ impl Character {
 
     pub fn set_gender(&mut self, gender: Gender) {
         self.gender = gender;
+    }
+
+    pub fn birth_date(&self) -> &Date {
+        &self.birth_date
+    }
+
+    pub fn set_birth_date(&mut self, birth_date: Date) {
+        self.birth_date = birth_date;
     }
 
     pub fn is_alive(&self) -> bool {

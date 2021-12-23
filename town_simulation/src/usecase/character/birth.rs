@@ -2,6 +2,7 @@ use crate::model::character::relation::family::RelativeType;
 use crate::model::character::relation::family::RelativeType::*;
 use crate::model::character::relation::RelationType::*;
 use crate::model::character::{CharacterId, CharacterMgr};
+use crate::model::time::Date;
 use crate::usecase::character::relation::get::*;
 use crate::usecase::character::{add_relation, add_relations};
 use std::collections::HashSet;
@@ -36,6 +37,14 @@ pub fn birth(manager: &mut CharacterMgr, father: CharacterId, mother: CharacterI
     child
 }
 
+pub fn set_birth_date(manager: &mut CharacterMgr, id: CharacterId, date: Date) {
+    manager.get_mut(id).unwrap().set_birth_date(date)
+}
+
+pub fn get_birth_date(manager: &CharacterMgr, id: CharacterId) -> &Date {
+    manager.get(id).unwrap().birth_date()
+}
+
 fn add_in_laws(
     manager: &mut CharacterMgr,
     character: CharacterId,
@@ -51,5 +60,21 @@ fn add_in_laws(
                 add_relation(manager, character, spouse, relation_type);
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn set_birth_date_of_character() {
+        let mut manager = CharacterMgr::default();
+        let id = manager.create();
+        let date = Date::new(42);
+
+        set_birth_date(&mut manager, id, date);
+
+        assert_eq!(get_birth_date(&manager, id), &date)
     }
 }
