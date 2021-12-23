@@ -21,6 +21,22 @@ struct ViewerData {
 }
 
 #[get("/")]
+fn get_overview() -> Html<String> {
+    Html(format!(
+        "<!DOCTYPE html>
+<html>
+ <head>
+  <link rel=\"stylesheet\" href=\"static/style.css\">
+ </head>
+ <body>
+  <h1>Overview</h1>
+  <p><a href=\"/character\">Characters</a></p>
+ </body>
+</html>
+"))
+}
+
+#[get("/")]
 fn get_characters(data: &State<ViewerData>) -> Html<String> {
     let lock = data.characters.lock().expect("lock shared data");
     Html(format!(
@@ -35,6 +51,7 @@ fn get_characters(data: &State<ViewerData>) -> Html<String> {
   <ul>
     {}
   </ul>
+  <p><a href=\"/\">Back</a></p>
  </body>
 </html>
 ",
@@ -54,7 +71,7 @@ fn show_character_list(characters: &[Character]) -> String {
 
 fn show_character_in_list(character: &Character) -> String {
     format!(
-        "   <li><a href=\"/{}\">{}</a></li>",
+        "   <li><a href=\"/character/{}\">{}</a></li>",
         character.id().id(),
         show_character_name(character),
     )
@@ -89,7 +106,7 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
   <ul>
     {}
   </ul>
-  <a href=\"/\">Back</a>
+  <a href=\"/character\">Back</a>
  </body>
 </html>
 ",
@@ -139,7 +156,7 @@ fn show_relations(manager: &CharacterMgr, character: &Character) -> String {
 fn show_relation(manager: &CharacterMgr, relation: &Relation) -> String {
     let other = manager.get(*relation.id()).unwrap();
     format!(
-        "   <li><a href=\"/{}\">{}</a> ({})</li>",
+        "   <li><a href=\"/character/{}\">{}</a> ({})</li>",
         relation.id().id(),
         show_character_name(other),
         relation
@@ -159,7 +176,8 @@ async fn main() {
     if let Err(e) = rocket::build()
         .manage(data)
         .mount("/static", FileServer::from("town_viewer/static/"))
-        .mount("/", routes![get_characters, get_character])
+        .mount("/", routes![get_overview])
+        .mount("/character", routes![get_characters, get_character])
         .launch()
         .await
     {
