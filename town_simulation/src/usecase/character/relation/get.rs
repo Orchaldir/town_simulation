@@ -91,6 +91,10 @@ fn get_relative(
     get_direct_relation(manager, character_id, RelationType::Relative(relative_type))
 }
 
+pub fn get_spouses(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
+    get_direct_relation(manager, character_id, RelationType::Spouse)
+}
+
 fn get_direct_relation(
     manager: &CharacterMgr,
     character_id: CharacterId,
