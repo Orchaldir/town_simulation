@@ -70,6 +70,10 @@ impl Character {
     }
 
     pub fn set_death_date(&mut self, death_date: Date) {
+        if self.is_dead() {
+            panic!("Character is already dead!");
+        }
+
         self.death_date = Some(death_date);
     }
 }

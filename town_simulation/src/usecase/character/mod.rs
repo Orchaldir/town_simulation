@@ -6,6 +6,7 @@ use crate::model::character::{CharacterId, CharacterMgr};
 use std::collections::HashSet;
 
 pub mod birth;
+pub mod death;
 pub mod marriage;
 pub mod relation;
 
