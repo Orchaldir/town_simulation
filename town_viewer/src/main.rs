@@ -17,14 +17,15 @@ use town_simulation::usecase::character::birth::birth;
 use town_simulation::usecase::character::death::death;
 use town_simulation::usecase::character::marriage::marry;
 use town_simulation::usecase::character::{set_gender, set_generated_name};
+use town_simulation::SimulationData;
 
 struct ViewerData {
-    characters: Mutex<CharacterMgr>,
+    data: Mutex<SimulationData>,
 }
 
 #[get("/")]
 fn get_overview(data: &State<ViewerData>) -> Html<String> {
-    let lock = data.characters.lock().expect("lock shared data");
+    let data = data.data.lock().expect("lock shared data");
     Html(format!(
         "<!DOCTYPE html>
 <html>
@@ -40,7 +41,7 @@ fn get_overview(data: &State<ViewerData>) -> Html<String> {
  </body>
 </html>
 ",
-        lock.get_all().len()
+        data.character_manager.get_all().len()
     ))
 }
 
@@ -52,7 +53,11 @@ fn simulate() -> Redirect {
 
 #[get("/")]
 fn get_characters(data: &State<ViewerData>) -> Html<String> {
-    let lock = data.characters.lock().expect("lock shared data");
+    let manager = &data
+        .data
+        .lock()
+        .expect("lock shared data")
+        .character_manager;
     Html(format!(
         "<!DOCTYPE html>
 <html>
@@ -69,8 +74,8 @@ fn get_characters(data: &State<ViewerData>) -> Html<String> {
  </body>
 </html>
 ",
-        lock.get_all().len(),
-        show_character_list(lock.get_all()),
+        manager.get_all().len(),
+        show_character_list(manager.get_all()),
     ))
 }
 
@@ -101,9 +106,13 @@ fn show_character_name(character: &Character) -> String {
 
 #[get("/<id>")]
 fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
-    let lock = data.characters.lock().expect("lock shared data");
+    let manager = &data
+        .data
+        .lock()
+        .expect("lock shared data")
+        .character_manager;
 
-    if let Some(character) = lock.get(CharacterId::new(id)) {
+    if let Some(character) = manager.get(CharacterId::new(id)) {
         Html(format!(
             "<!DOCTYPE html>
 <html>
@@ -129,7 +138,7 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
             character.gender(),
             character.birth_date().get_year(),
             show_death(character),
-            show_relations(&lock, character),
+            show_relations(manager, character),
         ))
     } else {
         Html(format!(
@@ -181,10 +190,15 @@ fn show_relation(manager: &CharacterMgr, relation: &Relation) -> String {
 
 #[rocket::main]
 async fn main() {
-    let name_generator = CharacterNameGenerator::load("resources/names/english");
-    let characters = init_characters(&name_generator);
+    let character_name_generator = CharacterNameGenerator::load("resources/names/english");
+    let character_manager = init_characters(&character_name_generator);
+    let simulation_data = SimulationData {
+        character_manager,
+        character_name_generator,
+        date: Date::new(1800),
+    };
     let data = ViewerData {
-        characters: Mutex::new(characters),
+        data: Mutex::new(simulation_data),
     };
 
     if let Err(e) = rocket::build()
