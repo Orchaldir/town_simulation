@@ -3,6 +3,7 @@ extern crate rocket;
 
 use rocket::fs::FileServer;
 use rocket::response::content::Html;
+use rocket::response::Redirect;
 use rocket::State;
 use std::sync::Mutex;
 use town_simulation::generation::name::character::CharacterNameGenerator;
@@ -11,6 +12,7 @@ use town_simulation::model::character::gender::Gender::{Female, Male};
 use town_simulation::model::character::relation::Relation;
 use town_simulation::model::character::{Character, CharacterId, CharacterMgr};
 use town_simulation::model::time::Date;
+use town_simulation::simulation::simulate_year;
 use town_simulation::usecase::character::birth::birth;
 use town_simulation::usecase::character::death::death;
 use town_simulation::usecase::character::marriage::marry;
@@ -21,7 +23,8 @@ struct ViewerData {
 }
 
 #[get("/")]
-fn get_overview() -> Html<String> {
+fn get_overview(data: &State<ViewerData>) -> Html<String> {
+    let lock = data.characters.lock().expect("lock shared data");
     Html(format!(
         "<!DOCTYPE html>
 <html>
@@ -29,11 +32,22 @@ fn get_overview() -> Html<String> {
   <link rel=\"stylesheet\" href=\"static/style.css\">
  </head>
  <body>
-  <h1>Overview</h1>
-  <p><a href=\"/character\">Characters</a></p>
+  <h1>Town Simulation</h1>
+  <h2>Overview</h2>
+  <p>Characters: <a href=\"/character\">{}</a></p>
+  <h2>Actions</h2>
+  <p><a href=\"/simulate\">Simulate</a></p>
  </body>
 </html>
-"))
+",
+        lock.get_all().len()
+    ))
+}
+
+#[get("/simulate")]
+fn simulate() -> Redirect {
+    simulate_year();
+    Redirect::to(uri!(get_overview()))
 }
 
 #[get("/")]
@@ -176,7 +190,7 @@ async fn main() {
     if let Err(e) = rocket::build()
         .manage(data)
         .mount("/static", FileServer::from("town_viewer/static/"))
-        .mount("/", routes![get_overview])
+        .mount("/", routes![get_overview, simulate])
         .mount("/character", routes![get_characters, get_character])
         .launch()
         .await
