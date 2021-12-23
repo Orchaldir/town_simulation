@@ -26,7 +26,7 @@ mod tests {
     use super::*;
     use crate::model::character::relation::family::RelativeType::*;
     use crate::model::character::relation::RelationType::*;
-    use crate::usecase::character::create_child;
+    use crate::usecase::character::birth::create_child;
 
     #[test]
     fn test_get_relation() {

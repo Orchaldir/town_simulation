@@ -110,7 +110,7 @@ fn get_direct_relation(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::usecase::character::create_child;
+    use crate::usecase::character::birth::create_child;
 
     #[test]
     fn test_get_relatives() {

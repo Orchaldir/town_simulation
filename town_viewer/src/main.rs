@@ -10,8 +10,9 @@ use town_simulation::model::character::gender::Gender;
 use town_simulation::model::character::gender::Gender::{Female, Male};
 use town_simulation::model::character::relation::Relation;
 use town_simulation::model::character::{Character, CharacterId, CharacterMgr};
+use town_simulation::usecase::character::birth::create_child;
 use town_simulation::usecase::character::marriage::marry;
-use town_simulation::usecase::character::{create_child, set_gender, set_generated_name};
+use town_simulation::usecase::character::{set_gender, set_generated_name};
 
 struct ViewerData {
     characters: Mutex<CharacterMgr>,
