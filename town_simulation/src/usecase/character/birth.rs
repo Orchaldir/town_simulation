@@ -51,10 +51,10 @@ pub fn add_in_laws(
             if !relatives.contains(&spouse) {
                 manager.get_mut(spouse).unwrap().relations.push(relation);
 
-                let other_relation = Relation::new(other_type, *target);
+                let other_relation = Relation::new(other_type, spouse);
 
                 manager
-                    .get_mut(spouse)
+                    .get_mut(character)
                     .unwrap()
                     .relations
                     .push(other_relation);
