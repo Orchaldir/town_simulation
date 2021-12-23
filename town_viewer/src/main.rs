@@ -10,7 +10,9 @@ use town_simulation::model::character::gender::Gender;
 use town_simulation::model::character::gender::Gender::{Female, Male};
 use town_simulation::model::character::relation::Relation;
 use town_simulation::model::character::{Character, CharacterId, CharacterMgr};
-use town_simulation::usecase::character::{create_child, set_gender, set_generated_name};
+use town_simulation::usecase::character::birth::birth;
+use town_simulation::usecase::character::marriage::marry;
+use town_simulation::usecase::character::{set_gender, set_generated_name};
 
 struct ViewerData {
     characters: Mutex<CharacterMgr>,
@@ -154,12 +156,18 @@ fn init_characters(names: &CharacterNameGenerator) -> CharacterMgr {
     let grandfather1 = init_character(&mut manager, names, Male);
     let grandmother1 = init_character(&mut manager, names, Female);
 
+    marry(&mut manager, grandfather0, grandmother0);
+    marry(&mut manager, grandfather1, grandmother1);
+
     // generation 1
     let father = init_son(&mut manager, names, grandfather0, grandmother0);
     let aunt = init_daughter(&mut manager, names, grandfather0, grandmother0);
     let mother = init_daughter(&mut manager, names, grandfather1, grandmother1);
     init_son(&mut manager, names, grandfather1, grandmother1);
-    let husband_aunt = init_character(&mut manager, names, Female);
+    let husband_aunt = init_character(&mut manager, names, Male);
+
+    marry(&mut manager, father, mother);
+    marry(&mut manager, husband_aunt, aunt);
 
     // generation 2
     init_child(&mut manager, names, father, mother, Male);
@@ -206,7 +214,7 @@ fn init_child(
     mother: CharacterId,
     gender: Gender,
 ) -> CharacterId {
-    let id = create_child(manager, father, mother);
+    let id = birth(manager, father, mother);
     set_gender(manager, id, gender);
     set_generated_name(manager, name_generator, id);
     id

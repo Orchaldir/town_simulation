@@ -3,33 +3,14 @@ use crate::model::character::gender::Gender;
 use crate::model::character::name::CharacterName;
 use crate::model::character::relation::{Relation, RelationType};
 use crate::model::character::{CharacterId, CharacterMgr};
-use crate::usecase::character::relation::get::{
-    combine, get_children, get_parents, get_shared_children, get_siblings,
-};
 use std::collections::HashSet;
-use RelationType::*;
 
+pub mod birth;
+pub mod marriage;
 pub mod relation;
 
-pub fn create_child(
-    manager: &mut CharacterMgr,
-    father: CharacterId,
-    mother: CharacterId,
-) -> CharacterId {
-    let parents = [father, mother].into();
-    let child = manager.create();
-    let siblings = get_shared_children(manager, father, mother);
-    let grandparents = combine(&parents, |id| get_parents(manager, id));
-    let piblings = combine(&parents, |id| get_siblings(manager, id));
-    let cousins = combine(&piblings, |id| get_children(manager, id));
-
-    add_relation(manager, child, &grandparents, GrandChild);
-    add_relation(manager, child, &cousins, Cousin);
-    add_relation(manager, child, &piblings, Nibling);
-    add_relation(manager, child, &siblings, Sibling);
-    add_relation(manager, child, &parents, Child);
-
-    child
+pub fn get_name(manager: &CharacterMgr, id: CharacterId) -> &CharacterName {
+    manager.get(id).unwrap().name()
 }
 
 pub fn set_name(manager: &mut CharacterMgr, id: CharacterId, name: CharacterName) {
@@ -59,24 +40,32 @@ pub fn set_gender_based_on_id(manager: &mut CharacterMgr, id: CharacterId) {
     set_gender(manager, id, gender);
 }
 
-fn add_relation(
+pub fn add_relations(
     manager: &mut CharacterMgr,
     character: CharacterId,
     others: &HashSet<CharacterId>,
     relation_type: RelationType,
 ) {
-    let relation = Relation::new(relation_type, character);
-    let other_type = relation_type.reverse();
-
     for other in others {
-        manager.get_mut(*other).unwrap().relations.push(relation);
-
-        let other_relation = Relation::new(other_type, *other);
-
-        manager
-            .get_mut(character)
-            .unwrap()
-            .relations
-            .push(other_relation);
+        add_relation(manager, character, *other, relation_type);
     }
+}
+
+pub fn add_relation(
+    manager: &mut CharacterMgr,
+    character0: CharacterId,
+    character1: CharacterId,
+    relation_type: RelationType,
+) {
+    manager
+        .get_mut(character1)
+        .unwrap()
+        .relations
+        .push(Relation::new(relation_type, character0));
+
+    manager
+        .get_mut(character0)
+        .unwrap()
+        .relations
+        .push(Relation::new(relation_type.reverse(), character1));
 }

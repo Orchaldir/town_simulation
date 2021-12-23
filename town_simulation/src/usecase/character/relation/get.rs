@@ -1,6 +1,8 @@
-use crate::model::character::relation::RelationType;
+use crate::model::character::relation::family::RelativeType;
+use crate::model::character::relation::{Relation, RelationType};
 use crate::model::character::{CharacterId, CharacterMgr};
 use std::collections::HashSet;
+use RelativeType::*;
 
 pub fn combine<F>(character_ids: &HashSet<CharacterId>, mut f: F) -> HashSet<CharacterId>
 where
@@ -16,7 +18,7 @@ where
 }
 
 pub fn get_children(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::Child)
+    get_relative(manager, character_id, Child)
 }
 
 pub fn get_shared_children(
@@ -31,34 +33,79 @@ pub fn get_shared_children(
 }
 
 pub fn get_cousins(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::Cousin)
+    get_relative(manager, character_id, Cousin)
 }
 
 pub fn get_niblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::Nibling)
+    get_relative(manager, character_id, Nibling)
 }
 
 pub fn get_grandchildren(
     manager: &CharacterMgr,
     character_id: CharacterId,
 ) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::GrandChild)
+    get_relative(manager, character_id, GrandChild)
 }
 
 pub fn get_grandparents(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::GrandParent)
+    get_relative(manager, character_id, GrandParent)
 }
 
 pub fn get_parents(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::Parent)
+    get_relative(manager, character_id, Parent)
 }
 
 pub fn get_piblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::Pibling)
+    get_relative(manager, character_id, Pibling)
 }
 
 pub fn get_siblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::Sibling)
+    get_relative(manager, character_id, Sibling)
+}
+
+pub fn get_relation_to_in_laws(
+    manager: &CharacterMgr,
+    character_id: CharacterId,
+) -> Vec<&Relation> {
+    manager
+        .get(character_id)
+        .unwrap()
+        .relations
+        .iter()
+        .filter(|&relation| relation.relation_type().is_in_law())
+        .collect()
+}
+
+pub fn get_relation_to_relatives(
+    manager: &CharacterMgr,
+    character_id: CharacterId,
+) -> Vec<&Relation> {
+    manager
+        .get(character_id)
+        .unwrap()
+        .relations
+        .iter()
+        .filter(|&relation| relation.relation_type().is_relative())
+        .collect()
+}
+
+pub fn get_relatives(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
+    get_relation_to_relatives(manager, character_id)
+        .iter()
+        .map(|&relation| *relation.id())
+        .collect()
+}
+
+fn get_relative(
+    manager: &CharacterMgr,
+    character_id: CharacterId,
+    relative_type: RelativeType,
+) -> HashSet<CharacterId> {
+    get_direct_relation(manager, character_id, RelationType::Relative(relative_type))
+}
+
+pub fn get_spouses(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
+    get_direct_relation(manager, character_id, RelationType::Spouse)
 }
 
 fn get_direct_relation(
@@ -80,7 +127,7 @@ fn get_direct_relation(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::usecase::character::create_child;
+    use crate::usecase::character::birth::birth;
 
     #[test]
     fn test_get_relatives() {
@@ -93,17 +140,17 @@ mod tests {
         let grandmother1 = manager.create();
 
         // generation 1
-        let father = create_child(&mut manager, grandfather0, grandmother0);
-        let aunt = create_child(&mut manager, grandfather0, grandmother0);
-        let mother = create_child(&mut manager, grandfather1, grandmother1);
-        let uncle = create_child(&mut manager, grandfather1, grandmother1);
+        let father = birth(&mut manager, grandfather0, grandmother0);
+        let aunt = birth(&mut manager, grandfather0, grandmother0);
+        let mother = birth(&mut manager, grandfather1, grandmother1);
+        let uncle = birth(&mut manager, grandfather1, grandmother1);
         let husband_aunt = manager.create();
 
         // generation 2
-        let character0 = create_child(&mut manager, father, mother);
-        let character1 = create_child(&mut manager, father, mother);
-        let character2 = create_child(&mut manager, father, mother);
-        let cousin = create_child(&mut manager, husband_aunt, aunt);
+        let character0 = birth(&mut manager, father, mother);
+        let character1 = birth(&mut manager, father, mother);
+        let character2 = birth(&mut manager, father, mother);
+        let cousin = birth(&mut manager, husband_aunt, aunt);
 
         // grandchildren of generation 0
         assert(
