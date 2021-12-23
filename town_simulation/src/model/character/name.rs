@@ -1,4 +1,5 @@
 use std::fmt::{Display, Formatter};
+use CharacterName::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum CharacterName {
@@ -8,7 +9,7 @@ pub enum CharacterName {
 
 impl CharacterName {
     pub fn simple<S: Into<String>>(name: S) -> Self {
-        Self::Simple(name.into())
+        Simple(name.into())
     }
 
     pub fn standard<S: Into<String>>(first: S, last: S) -> Self {
@@ -20,15 +21,28 @@ impl CharacterName {
 
     pub fn get_last(&self) -> Option<&str> {
         match self {
-            CharacterName::Simple(..) => None,
-            CharacterName::Standard { last, .. } => Some(last),
+            Simple(..) => None,
+            Standard { last, .. } => Some(last),
+        }
+    }
+
+    pub fn update_last<S: Into<String>>(&self, last: S) -> Self {
+        match self {
+            Simple(name) => Standard {
+                first: name.to_string(),
+                last: last.into(),
+            },
+            Standard { first, .. } => Standard {
+                first: first.to_string(),
+                last: last.into(),
+            },
         }
     }
 
     pub fn sorted(&self) -> String {
         match self {
-            CharacterName::Simple(name) => name.clone(),
-            CharacterName::Standard { first, last } => format!("{}, {}", last, first),
+            Simple(name) => name.clone(),
+            Standard { first, last } => format!("{}, {}", last, first),
         }
     }
 }
@@ -36,8 +50,8 @@ impl CharacterName {
 impl Display for CharacterName {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            CharacterName::Simple(name) => write!(f, "{}", name),
-            CharacterName::Standard { first, last } => write!(f, "{} {}", first, last),
+            Simple(name) => write!(f, "{}", name),
+            Standard { first, last } => write!(f, "{} {}", first, last),
         }
     }
 }

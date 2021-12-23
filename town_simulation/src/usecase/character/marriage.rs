@@ -8,6 +8,7 @@ pub fn marry(manager: &mut CharacterMgr, id0: CharacterId, id1: CharacterId) {
     update_in_laws(manager, id0, id1);
     update_in_laws(manager, id1, id0);
     add_relation(manager, id0, &vec![id1].into_iter().collect(), Spouse);
+    update_names(manager, id0, id1);
 }
 
 fn update_in_laws(manager: &mut CharacterMgr, from: CharacterId, to: CharacterId) {
@@ -19,5 +20,15 @@ fn update_in_laws(manager: &mut CharacterMgr, from: CharacterId, to: CharacterId
 
     for in_law in in_laws {
         manager.get_mut(to).unwrap().relations.push(in_law);
+    }
+}
+
+pub fn update_names(manager: &mut CharacterMgr, id0: CharacterId, id1: CharacterId) {
+    if let Some(last_name) = manager.get(id0).map(|c| c.name().get_last()).flatten() {
+        let last_name = last_name.to_string();
+        manager.get_mut(id1).map(|character| {
+            let name = character.name().update_last(last_name);
+            character.set_name(name);
+        });
     }
 }
