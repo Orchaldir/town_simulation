@@ -27,7 +27,7 @@ pub fn update_names(manager: &mut CharacterMgr, id0: CharacterId, id1: Character
     if let Some(last_name) = manager.get(id0).map(|c| c.name().get_last()).flatten() {
         let last_name = last_name.to_string();
         manager.get_mut(id1).map(|character| {
-            let name = character.name().update_last(last_name);
+            let name = character.name().marry(last_name);
             character.set_name(name);
         });
     }
