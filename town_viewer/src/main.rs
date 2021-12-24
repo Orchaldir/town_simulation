@@ -12,7 +12,9 @@ use town_simulation::model::character::{Character, CharacterId, CharacterMgr};
 use town_simulation::model::time::Date;
 use town_simulation::simulation::simulate_year;
 use town_simulation::usecase::character::birth::set_birth_date;
-use town_simulation::usecase::character::relation::get::get_spouses;
+use town_simulation::usecase::character::relation::get::{
+    get_relation_to_in_laws, get_relation_to_relatives, get_spouses,
+};
 use town_simulation::usecase::character::{set_gender_based_on_id, set_generated_name};
 use town_simulation::SimulationData;
 
@@ -129,11 +131,8 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
   <p><b>Gender:</b> {:?}</p>
   <p><b>Birth Date:</b> {}</p>{}
   <p><b>Age:</b> {}</p>
-  <h2>Relations</h2>{}
-  <ul>
-    {}
-  </ul>
-  <a href=\"/character\">Back</a>
+  <h2>Relations</h2>{}{}{}
+  </ul>  <a href=\"/character\">Back</a>
  </body>
 </html>
 ",
@@ -144,7 +143,8 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
             show_death(character),
             character.get_age(lock.date),
             show_spouse(manager, character_id),
-            show_relations(manager, character),
+            show_relatives(manager, character_id),
+            show_in_laws(manager, character_id),
         ))
     } else {
         Html(format!(
@@ -189,14 +189,25 @@ fn show_spouse(manager: &CharacterMgr, character: CharacterId) -> String {
     }
 }
 
-fn show_relations(manager: &CharacterMgr, character: &Character) -> String {
-    let vector: Vec<String> = character
-        .relations
-        .iter()
-        .map(|r| show_relation(manager, r))
-        .collect();
+fn show_relatives(manager: &CharacterMgr, id: CharacterId) -> String {
+    show_relations(manager, get_relation_to_relatives(manager, id), "Relatives")
+}
 
-    vector.join("\n")
+fn show_in_laws(manager: &CharacterMgr, id: CharacterId) -> String {
+    show_relations(manager, get_relation_to_in_laws(manager, id), "In-Laws")
+}
+
+fn show_relations(manager: &CharacterMgr, relations: Vec<&Relation>, text: &str) -> String {
+    if relations.is_empty() {
+        "".to_string()
+    } else {
+        let vector: Vec<String> = relations
+            .iter()
+            .map(|r| show_relation(manager, r))
+            .collect();
+
+        format!("\n<p><b>{}:</b></p>\n<ul>{}</ul>", text, vector.join("\n"),)
+    }
 }
 
 fn show_relation(manager: &CharacterMgr, relation: &Relation) -> String {
