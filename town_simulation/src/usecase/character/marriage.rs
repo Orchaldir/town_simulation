@@ -1,6 +1,6 @@
 use crate::model::character::relation::Relation;
 use crate::model::character::relation::RelationType::Spouse;
-use crate::model::character::{CharacterId, CharacterMgr};
+use crate::model::character::{Character, CharacterId, CharacterMgr};
 use crate::usecase::character::relation::get::{get_relation_to_relatives, get_spouses};
 use crate::usecase::character::{add_relation, add_relations};
 use std::collections::HashSet;
@@ -21,6 +21,18 @@ pub fn get_married_couples(manager: &CharacterMgr) -> HashSet<(CharacterId, Char
     }
 
     couples
+}
+
+pub fn get_unmarried(manager: &CharacterMgr) -> HashSet<CharacterId> {
+    manager.get_all()
+        .iter()
+        .filter(|&character| !is_married(character))
+        .map(|character| *character.id())
+        .collect()
+}
+
+pub fn is_married(character: &Character) -> bool {
+    character.relations.iter().find(|&relation| *relation.relation_type() == Spouse).is_some()
 }
 
 pub fn marry(manager: &mut CharacterMgr, id0: CharacterId, id1: CharacterId) {
@@ -67,7 +79,7 @@ mod tests {
     use std::hash::Hash;
 
     #[test]
-    fn test_husband_and_wife_are_spouses() {
+    fn husband_and_wife_are_spouses() {
         let mut manager = CharacterMgr::default();
 
         let husband = manager.create();
@@ -80,7 +92,7 @@ mod tests {
     }
 
     #[test]
-    fn test_husband_and_wife_are_couples() {
+    fn husband_and_wife_are_couples() {
         let mut manager = CharacterMgr::default();
 
         let husband0 = manager.create();
@@ -99,7 +111,22 @@ mod tests {
     }
 
     #[test]
-    fn test_wife_takes_name_of_husband() {
+    fn not_married_characters_are_unmarried() {
+        let mut manager = CharacterMgr::default();
+
+        let husband = manager.create();
+        let wife = manager.create();
+        let character = manager.create();
+
+        assert(get_unmarried(&manager), [husband, wife, character]);
+
+        marry(&mut manager, husband, wife);
+
+        assert(get_unmarried(&manager), [character]);
+    }
+
+    #[test]
+    fn wife_takes_name_of_husband() {
         let mut manager = CharacterMgr::default();
 
         let husband = manager.create();
@@ -119,7 +146,7 @@ mod tests {
     }
 
     #[test]
-    fn test_update_in_laws() {
+    fn relatives_of_spouse_become_in_laws() {
         let mut manager = CharacterMgr::default();
 
         let husband = manager.create();
