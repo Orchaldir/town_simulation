@@ -12,6 +12,7 @@ use town_simulation::model::character::{Character, CharacterId, CharacterMgr};
 use town_simulation::model::time::Date;
 use town_simulation::simulation::simulate_year;
 use town_simulation::usecase::character::birth::set_birth_date;
+use town_simulation::usecase::character::relation::get::get_spouses;
 use town_simulation::usecase::character::{set_gender_based_on_id, set_generated_name};
 use town_simulation::SimulationData;
 
@@ -112,8 +113,9 @@ fn show_character_name(character: &Character) -> String {
 fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
     let lock = &data.data.lock().expect("lock shared data");
     let manager = &lock.character_manager;
+    let character_id = CharacterId::new(id);
 
-    if let Some(character) = manager.get(CharacterId::new(id)) {
+    if let Some(character) = manager.get(character_id) {
         Html(format!(
             "<!DOCTYPE html>
 <html>
@@ -127,7 +129,7 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
   <p><b>Gender:</b> {:?}</p>
   <p><b>Birth Date:</b> {}</p>{}
   <p><b>Age:</b> {}</p>
-  <h2>Relations</h2>
+  <h2>Relations</h2>{}
   <ul>
     {}
   </ul>
@@ -136,11 +138,12 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
 </html>
 ",
             character.name(),
-            character.id().id(),
+            id,
             character.gender(),
             character.birth_date().get_year(),
             show_death(character),
             character.get_age(lock.date),
+            show_spouse(manager, character_id),
             show_relations(manager, character),
         ))
     } else {
@@ -164,6 +167,23 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
 fn show_death(character: &Character) -> String {
     if let Some(date) = character.death_date() {
         format!("\n<p><b>Death Date:</b> {}</p>", date.get_year())
+    } else {
+        "".to_string()
+    }
+}
+
+fn show_spouse(manager: &CharacterMgr, character: CharacterId) -> String {
+    if let Some(spouse) = get_spouses(manager, character)
+        .iter()
+        .map(|id| manager.get(*id))
+        .flatten()
+        .next()
+    {
+        format!(
+            "\n<p><b>Spouse:</b> <a href=\"/character/{}\">{}</a></p>",
+            spouse.id().id(),
+            show_character_name(spouse),
+        )
     } else {
         "".to_string()
     }
