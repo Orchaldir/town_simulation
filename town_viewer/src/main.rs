@@ -197,10 +197,11 @@ fn show_in_laws(manager: &CharacterMgr, id: CharacterId) -> String {
     show_relations(manager, get_relation_to_in_laws(manager, id), "In-Laws")
 }
 
-fn show_relations(manager: &CharacterMgr, relations: Vec<&Relation>, text: &str) -> String {
+fn show_relations(manager: &CharacterMgr, mut relations: Vec<&Relation>, text: &str) -> String {
     if relations.is_empty() {
         "".to_string()
     } else {
+        relations.sort();
         let vector: Vec<String> = relations
             .iter()
             .map(|r| show_relation(manager, r))

@@ -4,11 +4,12 @@ use crate::model::character::relation::family::RelativeType;
 use crate::model::character::CharacterId;
 use derive_getters::Getters;
 use derive_more::Constructor;
+use std::cmp::Ordering;
 use RelationType::*;
 
 pub mod family;
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub enum RelationType {
     InLaw(RelativeType),
     Relative(RelativeType),
@@ -44,7 +45,7 @@ impl RelationType {
     }
 }
 
-#[derive(Constructor, Getters, Copy, Clone, Debug, PartialEq)]
+#[derive(Constructor, Getters, Copy, Clone, Debug, Eq, PartialEq)]
 pub struct Relation {
     relation_type: RelationType,
     id: CharacterId,
@@ -56,5 +57,17 @@ impl Relation {
             Relative(relative_type) => Some(Self::new(InLaw(relative_type), self.id)),
             _ => None,
         }
+    }
+}
+
+impl PartialOrd<Self> for Relation {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.relation_type.partial_cmp(&other.relation_type)
+    }
+}
+
+impl Ord for Relation {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.relation_type.cmp(&other.relation_type)
     }
 }
