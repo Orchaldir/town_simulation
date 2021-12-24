@@ -1,14 +1,29 @@
+use crate::generation::character::generate_child;
 use crate::generation::number::RandomNumberGenerator;
-use crate::usecase::character::birth::{birth, set_birth_date};
+use crate::model::character::CharacterId;
 use crate::usecase::character::marriage::get_married_couples;
-use crate::usecase::character::{set_gender_based_on_id, set_generated_name};
 use crate::SimulationData;
 
 const BIRTH: u32 = 3;
 
 pub fn simulate_birth(data: &mut SimulationData, rng: &RandomNumberGenerator) {
-    let max_age = 45;
-    let chance_of_birth = 10;
+    for (id0, id1) in calculate_expecting(&data, rng, 45, 10) {
+        generate_child(
+            &mut data.character_manager,
+            &data.character_name_generator,
+            id0,
+            id1,
+            data.date,
+        );
+    }
+}
+
+fn calculate_expecting(
+    data: &&mut SimulationData,
+    rng: &RandomNumberGenerator,
+    max_age: u32,
+    chance_of_birth: u32,
+) -> Vec<(CharacterId, CharacterId)> {
     let mut expecting = Vec::new();
 
     for (id0, id1) in get_married_couples(&data.character_manager) {
@@ -39,22 +54,5 @@ pub fn simulate_birth(data: &mut SimulationData, rng: &RandomNumberGenerator) {
         }
     }
 
-    for (id0, id1) in expecting {
-        let child_id = birth(&mut data.character_manager, id0, id1);
-
-        println!(
-            "Characters {} & {} get child {}",
-            id0.id(),
-            id1.id(),
-            child_id.id()
-        );
-
-        set_birth_date(&mut data.character_manager, child_id, data.date);
-        set_gender_based_on_id(&mut data.character_manager, child_id);
-        set_generated_name(
-            &mut data.character_manager,
-            &data.character_name_generator,
-            child_id,
-        );
-    }
+    expecting
 }
