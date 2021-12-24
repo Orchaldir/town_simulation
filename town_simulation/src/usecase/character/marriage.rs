@@ -27,12 +27,16 @@ pub fn get_unmarried(manager: &CharacterMgr) -> HashSet<CharacterId> {
     manager
         .get_all()
         .iter()
-        .filter(|&character| !is_married(character))
+        .filter(|&character| !is_character_married(character))
         .map(|character| *character.id())
         .collect()
 }
 
-pub fn is_married(character: &Character) -> bool {
+pub fn is_married(manager: &CharacterMgr, id: CharacterId) -> bool {
+    is_character_married(manager.get(id).unwrap())
+}
+
+fn is_character_married(character: &Character) -> bool {
     character
         .relations
         .iter()
@@ -93,6 +97,21 @@ mod tests {
 
         assert(get_spouses(&manager, husband), [wife]);
         assert(get_spouses(&manager, wife), [husband]);
+    }
+
+    #[test]
+    fn character_are_married_after_marriage() {
+        let mut manager = CharacterMgr::default();
+
+        let husband = manager.create();
+        let wife = manager.create();
+        let character = manager.create();
+
+        marry(&mut manager, husband, wife);
+
+        assert!(is_married(&manager, husband));
+        assert!(is_married(&manager, wife));
+        assert!(!is_married(&manager, character));
     }
 
     #[test]

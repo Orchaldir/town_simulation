@@ -24,3 +24,22 @@ impl Default for Gender {
         Gender::Male
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_reverse() {
+        assert_eq!(Male.reverse(), Female);
+        assert_eq!(Female.reverse(), Male);
+    }
+
+    #[test]
+    fn test_is_reverse() {
+        assert!(Male.is_reverse(Female));
+        assert!(!Male.is_reverse(Male));
+        assert!(Female.is_reverse(Male));
+        assert!(!Female.is_reverse(Female));
+    }
+}
