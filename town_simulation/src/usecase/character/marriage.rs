@@ -1,8 +1,27 @@
 use crate::model::character::relation::Relation;
 use crate::model::character::relation::RelationType::Spouse;
 use crate::model::character::{CharacterId, CharacterMgr};
-use crate::usecase::character::relation::get::get_relation_to_relatives;
+use crate::usecase::character::relation::get::{get_relation_to_relatives, get_spouses};
 use crate::usecase::character::{add_relation, add_relations};
+use std::collections::HashSet;
+
+pub fn get_married_couples(manager: &CharacterMgr) -> HashSet<(CharacterId, CharacterId)> {
+    let mut couples = HashSet::new();
+
+    for character in manager.get_all() {
+        let id = *character.id();
+
+        for spouse in get_spouses(&manager, id) {
+            couples.insert(if id.id() < spouse.id() {
+                (id, spouse)
+            } else {
+                (spouse, id)
+            });
+        }
+    }
+
+    couples
+}
 
 pub fn marry(manager: &mut CharacterMgr, id0: CharacterId, id1: CharacterId) {
     update_in_laws(manager, id0, id1);
@@ -44,6 +63,8 @@ mod tests {
     use crate::usecase::character::relation::get::{get_relation_to_in_laws, get_spouses};
     use crate::usecase::character::{get_name, set_name};
     use std::collections::HashSet;
+    use std::fmt::Debug;
+    use std::hash::Hash;
 
     #[test]
     fn test_husband_and_wife_are_spouses() {
@@ -56,6 +77,25 @@ mod tests {
 
         assert(get_spouses(&manager, husband), [wife]);
         assert(get_spouses(&manager, wife), [husband]);
+    }
+
+    #[test]
+    fn test_husband_and_wife_are_couples() {
+        let mut manager = CharacterMgr::default();
+
+        let husband0 = manager.create();
+        let wife0 = manager.create();
+        let wife1 = manager.create();
+        let husband1 = manager.create();
+        manager.create();
+
+        marry(&mut manager, husband0, wife0);
+        marry(&mut manager, husband1, wife1);
+
+        assert(
+            get_married_couples(&manager),
+            [(husband0, wife0), (wife1, husband1)],
+        );
     }
 
     #[test]
@@ -113,7 +153,7 @@ mod tests {
         );
     }
 
-    fn assert<const N: usize>(left: HashSet<CharacterId>, right: [CharacterId; N]) {
+    fn assert<T: Eq + Hash + Debug, const N: usize>(left: HashSet<T>, right: [T; N]) {
         assert_eq!(left, right.into());
     }
 }
