@@ -70,13 +70,6 @@ fn select_characters_to_marry(
                 roll
             );
             selected.insert(*id);
-        } else {
-            println!(
-                "Character {:?} (age {}) doesn't marry with {}",
-                id.id(),
-                age,
-                roll
-            );
         }
     }
 

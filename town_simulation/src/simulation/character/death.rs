@@ -30,13 +30,6 @@ pub fn simulate_death(data: &mut SimulationData, rng: &RandomNumberGenerator) {
                 roll
             );
             dying.push(*character.id());
-        } else {
-            println!(
-                "Character {:?} (age {}) survives with {}",
-                character.id(),
-                age,
-                roll
-            );
         }
     }
 

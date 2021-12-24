@@ -189,7 +189,7 @@ fn show_relation(manager: &CharacterMgr, relation: &Relation) -> String {
 
 #[rocket::main]
 async fn main() {
-    let simulation_data = init_simulation(Date::new(1800), 100, 20);
+    let simulation_data = init_simulation(Date::new(1800), 20, 20);
 
     let data = ViewerData {
         data: Mutex::new(simulation_data),
@@ -208,9 +208,11 @@ async fn main() {
     };
 }
 
-fn init_simulation(start_date: Date, years: u32, characters: u32) -> SimulationData {
+fn init_simulation(mut start_date: Date, years: u32, characters: u32) -> SimulationData {
     let character_name_generator = CharacterNameGenerator::load("resources/names/english");
     let character_manager = init_characters(&character_name_generator, start_date, characters);
+
+    start_date.increase_by(20);
 
     let mut simulation_data = SimulationData {
         character_manager,
