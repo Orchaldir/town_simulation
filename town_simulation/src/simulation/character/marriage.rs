@@ -66,7 +66,7 @@ fn select_characters_to_marry(
     for id in marriageable {
         let character = data.character_manager.get(*id).unwrap();
         let age = character.get_age(data.date);
-        let chance_of_marriage = base_chance - (age - min_age);
+        let chance_of_marriage = base_chance.saturating_sub(age - min_age);
         let roll = rng.roll_d100(data.date.get_year(), id.id(), MARRIAGE);
 
         if roll < chance_of_marriage {

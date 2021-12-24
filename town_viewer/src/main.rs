@@ -186,7 +186,7 @@ fn show_relation(manager: &CharacterMgr, relation: &Relation) -> String {
 
 #[rocket::main]
 async fn main() {
-    let simulation_data = init_simulation(Date::new(1800), 40, 20);
+    let simulation_data = init_simulation(Date::new(1800), 100, 50);
 
     let data = ViewerData {
         data: Mutex::new(simulation_data),
