@@ -1,8 +1,47 @@
 use crate::model::character::relation::Relation;
 use crate::model::character::relation::RelationType::Spouse;
-use crate::model::character::{CharacterId, CharacterMgr};
-use crate::usecase::character::relation::get::get_relation_to_relatives;
+use crate::model::character::{Character, CharacterId, CharacterMgr};
+use crate::usecase::character::relation::get::{get_relation_to_relatives, get_spouses};
 use crate::usecase::character::{add_relation, add_relations};
+use std::collections::HashSet;
+
+pub fn get_married_couples(manager: &CharacterMgr) -> HashSet<(CharacterId, CharacterId)> {
+    let mut couples = HashSet::new();
+
+    for character in manager.get_all() {
+        let id = *character.id();
+
+        for spouse in get_spouses(manager, id) {
+            couples.insert(if id.id() < spouse.id() {
+                (id, spouse)
+            } else {
+                (spouse, id)
+            });
+        }
+    }
+
+    couples
+}
+
+pub fn get_unmarried(manager: &CharacterMgr) -> HashSet<CharacterId> {
+    manager
+        .get_all()
+        .iter()
+        .filter(|&character| !is_character_married(character))
+        .map(|character| *character.id())
+        .collect()
+}
+
+pub fn is_married(manager: &CharacterMgr, id: CharacterId) -> bool {
+    is_character_married(manager.get(id).unwrap())
+}
+
+fn is_character_married(character: &Character) -> bool {
+    character
+        .relations
+        .iter()
+        .any(|&relation| *relation.relation_type() == Spouse)
+}
 
 pub fn marry(manager: &mut CharacterMgr, id0: CharacterId, id1: CharacterId) {
     update_in_laws(manager, id0, id1);
@@ -44,9 +83,11 @@ mod tests {
     use crate::usecase::character::relation::get::{get_relation_to_in_laws, get_spouses};
     use crate::usecase::character::{get_name, set_name};
     use std::collections::HashSet;
+    use std::fmt::Debug;
+    use std::hash::Hash;
 
     #[test]
-    fn test_husband_and_wife_are_spouses() {
+    fn husband_and_wife_are_spouses() {
         let mut manager = CharacterMgr::default();
 
         let husband = manager.create();
@@ -59,7 +100,56 @@ mod tests {
     }
 
     #[test]
-    fn test_wife_takes_name_of_husband() {
+    fn character_are_married_after_marriage() {
+        let mut manager = CharacterMgr::default();
+
+        let husband = manager.create();
+        let wife = manager.create();
+        let character = manager.create();
+
+        marry(&mut manager, husband, wife);
+
+        assert!(is_married(&manager, husband));
+        assert!(is_married(&manager, wife));
+        assert!(!is_married(&manager, character));
+    }
+
+    #[test]
+    fn husband_and_wife_are_couples() {
+        let mut manager = CharacterMgr::default();
+
+        let husband0 = manager.create();
+        let wife0 = manager.create();
+        let wife1 = manager.create();
+        let husband1 = manager.create();
+        manager.create();
+
+        marry(&mut manager, husband0, wife0);
+        marry(&mut manager, husband1, wife1);
+
+        assert(
+            get_married_couples(&manager),
+            [(husband0, wife0), (wife1, husband1)],
+        );
+    }
+
+    #[test]
+    fn not_married_characters_are_unmarried() {
+        let mut manager = CharacterMgr::default();
+
+        let husband = manager.create();
+        let wife = manager.create();
+        let character = manager.create();
+
+        assert(get_unmarried(&manager), [husband, wife, character]);
+
+        marry(&mut manager, husband, wife);
+
+        assert(get_unmarried(&manager), [character]);
+    }
+
+    #[test]
+    fn wife_takes_name_of_husband() {
         let mut manager = CharacterMgr::default();
 
         let husband = manager.create();
@@ -79,7 +169,7 @@ mod tests {
     }
 
     #[test]
-    fn test_update_in_laws() {
+    fn relatives_of_spouse_become_in_laws() {
         let mut manager = CharacterMgr::default();
 
         let husband = manager.create();
@@ -113,7 +203,7 @@ mod tests {
         );
     }
 
-    fn assert<const N: usize>(left: HashSet<CharacterId>, right: [CharacterId; N]) {
+    fn assert<T: Eq + Hash + Debug, const N: usize>(left: HashSet<T>, right: [T; N]) {
         assert_eq!(left, right.into());
     }
 }

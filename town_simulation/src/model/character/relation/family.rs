@@ -4,16 +4,16 @@ use derive_getters::Getters;
 use derive_more::Constructor;
 use RelativeType::*;
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub enum RelativeType {
     GrandParent,
     /// Uncle or Aunt
     Pibling,
-    /// Nephew or Niece
-    Nibling,
     Parent,
     Cousin,
     Sibling,
+    /// Nephew or Niece
+    Nibling,
     Child,
     GrandChild,
 }

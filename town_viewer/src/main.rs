@@ -3,26 +3,63 @@ extern crate rocket;
 
 use rocket::fs::FileServer;
 use rocket::response::content::Html;
+use rocket::response::Redirect;
 use rocket::State;
 use std::sync::Mutex;
 use town_simulation::generation::name::character::CharacterNameGenerator;
-use town_simulation::model::character::gender::Gender;
-use town_simulation::model::character::gender::Gender::{Female, Male};
 use town_simulation::model::character::relation::Relation;
 use town_simulation::model::character::{Character, CharacterId, CharacterMgr};
 use town_simulation::model::time::Date;
-use town_simulation::usecase::character::birth::birth;
-use town_simulation::usecase::character::death::death;
-use town_simulation::usecase::character::marriage::marry;
-use town_simulation::usecase::character::{set_gender, set_generated_name};
+use town_simulation::simulation::simulate_year;
+use town_simulation::usecase::character::birth::set_birth_date;
+use town_simulation::usecase::character::relation::get::{
+    get_relation_to_in_laws, get_relation_to_relatives, get_spouses,
+};
+use town_simulation::usecase::character::{set_gender_based_on_id, set_generated_name};
+use town_simulation::SimulationData;
 
 struct ViewerData {
-    characters: Mutex<CharacterMgr>,
+    data: Mutex<SimulationData>,
+}
+
+#[get("/")]
+fn get_overview(data: &State<ViewerData>) -> Html<String> {
+    let data = data.data.lock().expect("lock shared data");
+    Html(format!(
+        "<!DOCTYPE html>
+<html>
+ <head>
+  <link rel=\"stylesheet\" href=\"static/style.css\">
+ </head>
+ <body>
+  <h1>Town Simulation</h1>
+  <h2>Overview</h2>
+  <p><b>Year:</b> {}</p>
+  <p><b>Characters</b>: <a href=\"/character\">{}</a></p>
+  <h2>Actions</h2>
+  <p><a href=\"/simulate\">Simulate</a></p>
+ </body>
+</html>
+",
+        data.date.get_year(),
+        data.character_manager.get_all().len()
+    ))
+}
+
+#[get("/simulate")]
+fn simulate(data: &State<ViewerData>) -> Redirect {
+    let mut data = data.data.lock().expect("lock shared data");
+    simulate_year(&mut data);
+    Redirect::to(uri!(get_overview()))
 }
 
 #[get("/")]
 fn get_characters(data: &State<ViewerData>) -> Html<String> {
-    let lock = data.characters.lock().expect("lock shared data");
+    let lock = &data.data.lock().expect("lock shared data");
+    let manager = &lock.character_manager;
+    let total = manager.get_all().len();
+    let alive = manager.get_all().iter().filter(|&c| c.is_alive()).count();
+    let dead = total - alive;
     Html(format!(
         "<!DOCTYPE html>
 <html>
@@ -31,32 +68,38 @@ fn get_characters(data: &State<ViewerData>) -> Html<String> {
  </head>
  <body>
   <h1>Characters</h1>
-  <p>The town has {} characters:</p>
+  <p><b>Alive:</b> {}</p>
+  <p><b>Dead:</b> {}</p>
+  <p><b>Total:</b> {}</p>
   <ul>
     {}
   </ul>
+  <p><a href=\"/\">Back</a></p>
  </body>
 </html>
 ",
-        lock.get_all().len(),
-        show_character_list(lock.get_all()),
+        alive,
+        dead,
+        total,
+        show_character_list(manager.get_all(), lock.date),
     ))
 }
 
-fn show_character_list(characters: &[Character]) -> String {
+fn show_character_list(characters: &[Character], date: Date) -> String {
     let vector: Vec<String> = characters
         .iter()
-        .map(|c| show_character_in_list(c))
+        .map(|c| show_character_in_list(c, date))
         .collect();
 
     vector.join("\n")
 }
 
-fn show_character_in_list(character: &Character) -> String {
+fn show_character_in_list(character: &Character, date: Date) -> String {
     format!(
-        "   <li><a href=\"/{}\">{}</a></li>",
+        "   <li><a href=\"/character/{}\">{}</a> (Age: {})</li>",
         character.id().id(),
         show_character_name(character),
+        character.get_age(date),
     )
 }
 
@@ -70,9 +113,11 @@ fn show_character_name(character: &Character) -> String {
 
 #[get("/<id>")]
 fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
-    let lock = data.characters.lock().expect("lock shared data");
+    let lock = &data.data.lock().expect("lock shared data");
+    let manager = &lock.character_manager;
+    let character_id = CharacterId::new(id);
 
-    if let Some(character) = lock.get(CharacterId::new(id)) {
+    if let Some(character) = manager.get(character_id) {
         Html(format!(
             "<!DOCTYPE html>
 <html>
@@ -85,20 +130,21 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
   <p><b>Id:</b> {}</p>
   <p><b>Gender:</b> {:?}</p>
   <p><b>Birth Date:</b> {}</p>{}
-  <h2>Relations</h2>
-  <ul>
-    {}
-  </ul>
-  <a href=\"/\">Back</a>
+  <p><b>Age:</b> {}</p>
+  <h2>Relations</h2>{}{}{}
+  </ul>  <a href=\"/character\">Back</a>
  </body>
 </html>
 ",
             character.name(),
-            character.id().id(),
+            id,
             character.gender(),
             character.birth_date().get_year(),
             show_death(character),
-            show_relations(&lock, character),
+            character.get_age(lock.date),
+            show_spouse(manager, character_id),
+            show_relatives(manager, character_id),
+            show_in_laws(manager, character_id),
         ))
     } else {
         Html(format!(
@@ -126,20 +172,49 @@ fn show_death(character: &Character) -> String {
     }
 }
 
-fn show_relations(manager: &CharacterMgr, character: &Character) -> String {
-    let vector: Vec<String> = character
-        .relations
+fn show_spouse(manager: &CharacterMgr, character: CharacterId) -> String {
+    if let Some(spouse) = get_spouses(manager, character)
         .iter()
-        .map(|r| show_relation(manager, r))
-        .collect();
+        .map(|id| manager.get(*id))
+        .flatten()
+        .next()
+    {
+        format!(
+            "\n<p><b>Spouse:</b> <a href=\"/character/{}\">{}</a></p>",
+            spouse.id().id(),
+            show_character_name(spouse),
+        )
+    } else {
+        "".to_string()
+    }
+}
 
-    vector.join("\n")
+fn show_relatives(manager: &CharacterMgr, id: CharacterId) -> String {
+    show_relations(manager, get_relation_to_relatives(manager, id), "Relatives")
+}
+
+fn show_in_laws(manager: &CharacterMgr, id: CharacterId) -> String {
+    show_relations(manager, get_relation_to_in_laws(manager, id), "In-Laws")
+}
+
+fn show_relations(manager: &CharacterMgr, mut relations: Vec<&Relation>, text: &str) -> String {
+    if relations.is_empty() {
+        "".to_string()
+    } else {
+        relations.sort();
+        let vector: Vec<String> = relations
+            .iter()
+            .map(|r| show_relation(manager, r))
+            .collect();
+
+        format!("\n<p><b>{}:</b></p>\n<ul>{}</ul>", text, vector.join("\n"),)
+    }
 }
 
 fn show_relation(manager: &CharacterMgr, relation: &Relation) -> String {
     let other = manager.get(*relation.id()).unwrap();
     format!(
-        "   <li><a href=\"/{}\">{}</a> ({})</li>",
+        "   <li><a href=\"/character/{}\">{}</a> ({})</li>",
         relation.id().id(),
         show_character_name(other),
         relation
@@ -150,16 +225,17 @@ fn show_relation(manager: &CharacterMgr, relation: &Relation) -> String {
 
 #[rocket::main]
 async fn main() {
-    let name_generator = CharacterNameGenerator::load("resources/names/english");
-    let characters = init_characters(&name_generator);
+    let simulation_data = init_simulation(Date::new(1800), 100, 50);
+
     let data = ViewerData {
-        characters: Mutex::new(characters),
+        data: Mutex::new(simulation_data),
     };
 
     if let Err(e) = rocket::build()
         .manage(data)
         .mount("/static", FileServer::from("town_viewer/static/"))
-        .mount("/", routes![get_characters, get_character])
+        .mount("/", routes![get_overview, simulate])
+        .mount("/character", routes![get_characters, get_character])
         .launch()
         .await
     {
@@ -168,35 +244,31 @@ async fn main() {
     };
 }
 
-fn init_characters(names: &CharacterNameGenerator) -> CharacterMgr {
+fn init_simulation(mut start_date: Date, years: u32, characters: u32) -> SimulationData {
+    let character_name_generator = CharacterNameGenerator::load("resources/names/english");
+    let character_manager = init_characters(&character_name_generator, start_date, characters);
+
+    start_date.increase_by(20);
+
+    let mut simulation_data = SimulationData {
+        character_manager,
+        character_name_generator,
+        date: start_date,
+    };
+
+    for _i in 0..years {
+        simulate_year(&mut simulation_data);
+    }
+
+    simulation_data
+}
+
+fn init_characters(names: &CharacterNameGenerator, date: Date, characters: u32) -> CharacterMgr {
     let mut manager = CharacterMgr::default();
 
-    // generation 0
-    let grandfather0 = init_character(&mut manager, names, Male);
-    let grandmother0 = init_character(&mut manager, names, Female);
-    let grandfather1 = init_character(&mut manager, names, Male);
-    let grandmother1 = init_character(&mut manager, names, Female);
-
-    marry(&mut manager, grandfather0, grandmother0);
-    marry(&mut manager, grandfather1, grandmother1);
-
-    // generation 1
-    let father = init_son(&mut manager, names, grandfather0, grandmother0);
-    let aunt = init_daughter(&mut manager, names, grandfather0, grandmother0);
-    let mother = init_daughter(&mut manager, names, grandfather1, grandmother1);
-    init_son(&mut manager, names, grandfather1, grandmother1);
-    let husband_aunt = init_character(&mut manager, names, Male);
-
-    marry(&mut manager, father, mother);
-    marry(&mut manager, husband_aunt, aunt);
-
-    // generation 2
-    init_child(&mut manager, names, father, mother, Male);
-    init_child(&mut manager, names, father, mother, Female);
-    init_child(&mut manager, names, father, mother, Male);
-    init_child(&mut manager, names, husband_aunt, aunt, Female);
-
-    death(&mut manager, grandfather0, Date::new(3));
+    for _i in 0..characters {
+        init_character(&mut manager, names, date);
+    }
 
     manager
 }
@@ -204,41 +276,11 @@ fn init_characters(names: &CharacterNameGenerator) -> CharacterMgr {
 fn init_character(
     manager: &mut CharacterMgr,
     name_generator: &CharacterNameGenerator,
-    gender: Gender,
+    date: Date,
 ) -> CharacterId {
     let id = manager.create();
-    set_gender(manager, id, gender);
-    set_generated_name(manager, name_generator, id);
-    id
-}
-
-fn init_son(
-    manager: &mut CharacterMgr,
-    name_generator: &CharacterNameGenerator,
-    father: CharacterId,
-    mother: CharacterId,
-) -> CharacterId {
-    init_child(manager, name_generator, father, mother, Male)
-}
-
-fn init_daughter(
-    manager: &mut CharacterMgr,
-    name_generator: &CharacterNameGenerator,
-    father: CharacterId,
-    mother: CharacterId,
-) -> CharacterId {
-    init_child(manager, name_generator, father, mother, Female)
-}
-
-fn init_child(
-    manager: &mut CharacterMgr,
-    name_generator: &CharacterNameGenerator,
-    father: CharacterId,
-    mother: CharacterId,
-    gender: Gender,
-) -> CharacterId {
-    let id = birth(manager, father, mother);
-    set_gender(manager, id, gender);
+    set_birth_date(manager, id, date);
+    set_gender_based_on_id(manager, id);
     set_generated_name(manager, name_generator, id);
     id
 }
