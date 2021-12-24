@@ -1,5 +1,7 @@
 use crate::generation::number::RandomNumberGenerator;
+use crate::model::character::gender::Gender::Male;
 use crate::model::character::{CharacterId, CharacterMgr};
+use crate::usecase::character::get_gender;
 use crate::usecase::character::marriage::{get_unmarried, marry};
 use crate::SimulationData;
 use std::collections::HashSet;
@@ -20,7 +22,12 @@ pub fn simulate_marriage(data: &mut SimulationData, rng: &RandomNumberGenerator)
 
     for id in selected_characters {
         if let Some(spouse) = select_spouse(&data.character_manager, id, &remaining) {
-            marry(&mut data.character_manager, id, spouse);
+            if get_gender(&data.character_manager, id) == Male {
+                marry(&mut data.character_manager, id, spouse);
+            } else {
+                marry(&mut data.character_manager, spouse, id);
+            }
+
             remaining.remove(&spouse);
         }
     }

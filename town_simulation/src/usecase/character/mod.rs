@@ -27,6 +27,10 @@ pub fn set_generated_name(
     set_name(manager, id, generator.generate(manager, id));
 }
 
+pub fn get_gender(manager: &CharacterMgr, id: CharacterId) -> Gender {
+    *manager.get(id).unwrap().gender()
+}
+
 pub fn set_gender(manager: &mut CharacterMgr, id: CharacterId, gender: Gender) {
     let character = manager.get_mut(id).unwrap();
     character.set_gender(gender);

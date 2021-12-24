@@ -8,7 +8,7 @@ const BIRTH: u32 = 3;
 
 pub fn simulate_birth(data: &mut SimulationData, rng: &RandomNumberGenerator) {
     let max_age = 45;
-    let chance_of_birth = 20;
+    let chance_of_birth = 10;
     let mut expecting = Vec::new();
 
     for (id0, id1) in get_married_couples(&data.character_manager) {
