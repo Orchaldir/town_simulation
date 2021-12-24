@@ -19,7 +19,7 @@ pub fn simulate_death(data: &mut SimulationData, rng: &RandomNumberGenerator) {
             continue;
         }
 
-        let risk_of_death = age - min_age_for_death;
+        let risk_of_death = (age - min_age_for_death) / 2;
         let roll = rng.roll_d100(data.date.get_year(), character.id().id(), DEATH);
 
         if roll < risk_of_death {

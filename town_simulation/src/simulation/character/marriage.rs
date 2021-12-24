@@ -3,6 +3,7 @@ use crate::model::character::gender::Gender::Male;
 use crate::model::character::{CharacterId, CharacterMgr};
 use crate::usecase::character::get_gender;
 use crate::usecase::character::marriage::{get_unmarried, marry};
+use crate::usecase::character::relation::get::get_relatives;
 use crate::SimulationData;
 use std::collections::HashSet;
 
@@ -88,10 +89,12 @@ fn select_spouse(
     id: CharacterId,
     candidates: &HashSet<CharacterId>,
 ) -> Option<CharacterId> {
+    let relatives = get_relatives(manager, id);
     let character = manager.get(id).unwrap();
 
     candidates
         .iter()
+        .filter(|&candidate_id| !relatives.contains(candidate_id))
         .map(|&candidate_id| manager.get(candidate_id).unwrap())
         .filter(|&candidate| character.gender().is_reverse(*candidate.gender()))
         .map(|candidate| *candidate.id())

@@ -54,6 +54,9 @@ fn simulate(data: &State<ViewerData>) -> Redirect {
 fn get_characters(data: &State<ViewerData>) -> Html<String> {
     let lock = &data.data.lock().expect("lock shared data");
     let manager = &lock.character_manager;
+    let total = manager.get_all().len();
+    let alive = manager.get_all().iter().filter(|&c| c.is_alive()).count();
+    let dead = total - alive;
     Html(format!(
         "<!DOCTYPE html>
 <html>
@@ -62,7 +65,9 @@ fn get_characters(data: &State<ViewerData>) -> Html<String> {
  </head>
  <body>
   <h1>Characters</h1>
-  <p>The town has {} characters:</p>
+  <p><b>Alive:</b> {}</p>
+  <p><b>Dead:</b> {}</p>
+  <p><b>Total:</b> {}</p>
   <ul>
     {}
   </ul>
@@ -70,7 +75,9 @@ fn get_characters(data: &State<ViewerData>) -> Html<String> {
  </body>
 </html>
 ",
-        manager.get_all().len(),
+        alive,
+        dead,
+        total,
         show_character_list(manager.get_all(), lock.date),
     ))
 }
