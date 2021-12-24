@@ -52,11 +52,8 @@ fn simulate(data: &State<ViewerData>) -> Redirect {
 
 #[get("/")]
 fn get_characters(data: &State<ViewerData>) -> Html<String> {
-    let manager = &data
-        .data
-        .lock()
-        .expect("lock shared data")
-        .character_manager;
+    let lock = &data.data.lock().expect("lock shared data");
+    let manager = &lock.character_manager;
     Html(format!(
         "<!DOCTYPE html>
 <html>
@@ -74,24 +71,25 @@ fn get_characters(data: &State<ViewerData>) -> Html<String> {
 </html>
 ",
         manager.get_all().len(),
-        show_character_list(manager.get_all()),
+        show_character_list(manager.get_all(), lock.date),
     ))
 }
 
-fn show_character_list(characters: &[Character]) -> String {
+fn show_character_list(characters: &[Character], date: Date) -> String {
     let vector: Vec<String> = characters
         .iter()
-        .map(|c| show_character_in_list(c))
+        .map(|c| show_character_in_list(c, date))
         .collect();
 
     vector.join("\n")
 }
 
-fn show_character_in_list(character: &Character) -> String {
+fn show_character_in_list(character: &Character, date: Date) -> String {
     format!(
-        "   <li><a href=\"/character/{}\">{}</a></li>",
+        "   <li><a href=\"/character/{}\">{}</a> (Age: {})</li>",
         character.id().id(),
         show_character_name(character),
+        character.get_age(date),
     )
 }
 
@@ -105,11 +103,8 @@ fn show_character_name(character: &Character) -> String {
 
 #[get("/<id>")]
 fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
-    let manager = &data
-        .data
-        .lock()
-        .expect("lock shared data")
-        .character_manager;
+    let lock = &data.data.lock().expect("lock shared data");
+    let manager = &lock.character_manager;
 
     if let Some(character) = manager.get(CharacterId::new(id)) {
         Html(format!(
@@ -124,6 +119,7 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
   <p><b>Id:</b> {}</p>
   <p><b>Gender:</b> {:?}</p>
   <p><b>Birth Date:</b> {}</p>{}
+  <p><b>Age:</b> {}</p>
   <h2>Relations</h2>
   <ul>
     {}
@@ -137,6 +133,7 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
             character.gender(),
             character.birth_date().get_year(),
             show_death(character),
+            character.get_age(lock.date),
             show_relations(manager, character),
         ))
     } else {

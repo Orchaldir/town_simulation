@@ -64,7 +64,13 @@ impl Character {
     }
 
     pub fn get_age(&self, date: Date) -> u32 {
-        date.get_year() - self.birth_date.get_year()
+        if let Some(death_date) = self.death_date {
+            death_date
+        } else {
+            date
+        }
+        .get_year()
+            - self.birth_date.get_year()
     }
 
     pub fn set_birth_date(&mut self, birth_date: Date) {
@@ -114,5 +120,27 @@ impl CharacterMgr {
 
     pub fn get_mut(&mut self, id: CharacterId) -> Option<&mut Character> {
         self.characters.get_mut(id.0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn age_before_death() {
+        let mut character = Character::new(CharacterId::new(0));
+        character.set_birth_date(Date::new(10));
+
+        assert_eq!(character.get_age(Date::new(52)), 42);
+    }
+
+    #[test]
+    fn age_after_death() {
+        let mut character = Character::new(CharacterId::new(0));
+        character.set_birth_date(Date::new(10));
+        character.set_death_date(Date::new(52));
+
+        assert_eq!(character.get_age(Date::new(100)), 42);
     }
 }
