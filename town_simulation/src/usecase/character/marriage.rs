@@ -11,7 +11,7 @@ pub fn get_married_couples(manager: &CharacterMgr) -> HashSet<(CharacterId, Char
     for character in manager.get_all() {
         let id = *character.id();
 
-        for spouse in get_spouses(&manager, id) {
+        for spouse in get_spouses(manager, id) {
             couples.insert(if id.id() < spouse.id() {
                 (id, spouse)
             } else {
@@ -24,7 +24,8 @@ pub fn get_married_couples(manager: &CharacterMgr) -> HashSet<(CharacterId, Char
 }
 
 pub fn get_unmarried(manager: &CharacterMgr) -> HashSet<CharacterId> {
-    manager.get_all()
+    manager
+        .get_all()
         .iter()
         .filter(|&character| !is_married(character))
         .map(|character| *character.id())
@@ -32,7 +33,10 @@ pub fn get_unmarried(manager: &CharacterMgr) -> HashSet<CharacterId> {
 }
 
 pub fn is_married(character: &Character) -> bool {
-    character.relations.iter().find(|&relation| *relation.relation_type() == Spouse).is_some()
+    character
+        .relations
+        .iter()
+        .any(|&relation| *relation.relation_type() == Spouse)
 }
 
 pub fn marry(manager: &mut CharacterMgr, id0: CharacterId, id1: CharacterId) {

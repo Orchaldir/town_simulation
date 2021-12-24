@@ -7,16 +7,12 @@ use rocket::response::Redirect;
 use rocket::State;
 use std::sync::Mutex;
 use town_simulation::generation::name::character::CharacterNameGenerator;
-use town_simulation::model::character::gender::Gender;
-use town_simulation::model::character::gender::Gender::{Female, Male};
 use town_simulation::model::character::relation::Relation;
 use town_simulation::model::character::{Character, CharacterId, CharacterMgr};
 use town_simulation::model::time::Date;
 use town_simulation::simulation::simulate_year;
-use town_simulation::usecase::character::birth::birth;
-use town_simulation::usecase::character::death::death;
-use town_simulation::usecase::character::marriage::marry;
-use town_simulation::usecase::character::{set_gender, set_generated_name};
+use town_simulation::usecase::character::birth::set_birth_date;
+use town_simulation::usecase::character::{set_gender_based_on_id, set_generated_name};
 use town_simulation::SimulationData;
 
 struct ViewerData {
@@ -193,13 +189,8 @@ fn show_relation(manager: &CharacterMgr, relation: &Relation) -> String {
 
 #[rocket::main]
 async fn main() {
-    let character_name_generator = CharacterNameGenerator::load("resources/names/english");
-    let character_manager = init_characters(&character_name_generator);
-    let simulation_data = SimulationData {
-        character_manager,
-        character_name_generator,
-        date: Date::new(1800),
-    };
+    let simulation_data = init_simulation(Date::new(1800), 100, 20);
+
     let data = ViewerData {
         data: Mutex::new(simulation_data),
     };
@@ -217,35 +208,29 @@ async fn main() {
     };
 }
 
-fn init_characters(names: &CharacterNameGenerator) -> CharacterMgr {
+fn init_simulation(start_date: Date, years: u32, characters: u32) -> SimulationData {
+    let character_name_generator = CharacterNameGenerator::load("resources/names/english");
+    let character_manager = init_characters(&character_name_generator, start_date, characters);
+
+    let mut simulation_data = SimulationData {
+        character_manager,
+        character_name_generator,
+        date: start_date,
+    };
+
+    for _i in 0..years {
+        simulate_year(&mut simulation_data);
+    }
+
+    simulation_data
+}
+
+fn init_characters(names: &CharacterNameGenerator, date: Date, characters: u32) -> CharacterMgr {
     let mut manager = CharacterMgr::default();
 
-    // generation 0
-    let grandfather0 = init_character(&mut manager, names, Male);
-    let grandmother0 = init_character(&mut manager, names, Female);
-    let grandfather1 = init_character(&mut manager, names, Male);
-    let grandmother1 = init_character(&mut manager, names, Female);
-
-    marry(&mut manager, grandfather0, grandmother0);
-    marry(&mut manager, grandfather1, grandmother1);
-
-    // generation 1
-    let father = init_son(&mut manager, names, grandfather0, grandmother0);
-    let aunt = init_daughter(&mut manager, names, grandfather0, grandmother0);
-    let mother = init_daughter(&mut manager, names, grandfather1, grandmother1);
-    init_son(&mut manager, names, grandfather1, grandmother1);
-    let husband_aunt = init_character(&mut manager, names, Male);
-
-    marry(&mut manager, father, mother);
-    marry(&mut manager, husband_aunt, aunt);
-
-    // generation 2
-    init_child(&mut manager, names, father, mother, Male);
-    init_child(&mut manager, names, father, mother, Female);
-    init_child(&mut manager, names, father, mother, Male);
-    init_child(&mut manager, names, husband_aunt, aunt, Female);
-
-    death(&mut manager, grandfather0, Date::new(3));
+    for _i in 0..characters {
+        init_character(&mut manager, names, date);
+    }
 
     manager
 }
@@ -253,41 +238,11 @@ fn init_characters(names: &CharacterNameGenerator) -> CharacterMgr {
 fn init_character(
     manager: &mut CharacterMgr,
     name_generator: &CharacterNameGenerator,
-    gender: Gender,
+    date: Date,
 ) -> CharacterId {
     let id = manager.create();
-    set_gender(manager, id, gender);
-    set_generated_name(manager, name_generator, id);
-    id
-}
-
-fn init_son(
-    manager: &mut CharacterMgr,
-    name_generator: &CharacterNameGenerator,
-    father: CharacterId,
-    mother: CharacterId,
-) -> CharacterId {
-    init_child(manager, name_generator, father, mother, Male)
-}
-
-fn init_daughter(
-    manager: &mut CharacterMgr,
-    name_generator: &CharacterNameGenerator,
-    father: CharacterId,
-    mother: CharacterId,
-) -> CharacterId {
-    init_child(manager, name_generator, father, mother, Female)
-}
-
-fn init_child(
-    manager: &mut CharacterMgr,
-    name_generator: &CharacterNameGenerator,
-    father: CharacterId,
-    mother: CharacterId,
-    gender: Gender,
-) -> CharacterId {
-    let id = birth(manager, father, mother);
-    set_gender(manager, id, gender);
+    set_birth_date(manager, id, date);
+    set_gender_based_on_id(manager, id);
     set_generated_name(manager, name_generator, id);
     id
 }
