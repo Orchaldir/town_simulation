@@ -63,6 +63,10 @@ impl Character {
         &self.birth_date
     }
 
+    pub fn get_age(&self, date: Date) -> u32 {
+        date.get_year() - self.birth_date.get_year()
+    }
+
     pub fn set_birth_date(&mut self, birth_date: Date) {
         self.birth_date = birth_date;
     }
