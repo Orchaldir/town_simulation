@@ -1,7 +1,10 @@
+use crate::model::building::usage::BuildingUsage;
 use crate::model::character::CharacterId;
 use crate::model::time::Date;
 use derive_getters::Getters;
 use derive_more::Constructor;
+
+pub mod usage;
 
 #[derive(Constructor, Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct BuildingId(usize);
@@ -15,12 +18,17 @@ impl BuildingId {
 #[derive(Constructor, Getters, Clone, Debug, PartialEq)]
 pub struct Building {
     id: BuildingId,
+    usage: BuildingUsage,
     construction_date: Date,
     builder: CharacterId,
     owner: CharacterId,
 }
 
 impl Building {
+    pub fn get_usage_mut(&mut self) -> &mut BuildingUsage {
+        &mut self.usage
+    }
+
     pub fn update_owner(&mut self, owner: CharacterId) {
         self.owner = owner;
     }
@@ -34,12 +42,13 @@ pub struct BuildingMgr {
 impl BuildingMgr {
     pub fn create(
         &mut self,
+        usage: BuildingUsage,
         construction_date: Date,
         builder: CharacterId,
         owner: CharacterId,
     ) -> BuildingId {
         let id = BuildingId::new(self.buildings.len());
-        let building = Building::new(id, construction_date, builder, owner);
+        let building = Building::new(id, usage, construction_date, builder, owner);
         self.buildings.push(building);
         id
     }
