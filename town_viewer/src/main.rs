@@ -29,7 +29,7 @@ fn get_overview(data: &State<ViewerData>) -> Html<String> {
         "<!DOCTYPE html>
 <html>
  <head>
-  <link rel=\"stylesheet\" href=\"static/style.css\">
+  <link rel=\"stylesheet\" href=\"/static/style.css\">
  </head>
  <body>
   <h1>Town Simulation</h1>
@@ -64,7 +64,7 @@ fn get_characters(data: &State<ViewerData>) -> Html<String> {
         "<!DOCTYPE html>
 <html>
  <head>
-  <link rel=\"stylesheet\" href=\"static/style.css\">
+  <link rel=\"stylesheet\" href=\"/static/style.css\">
  </head>
  <body>
   <h1>Characters</h1>
@@ -122,7 +122,7 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
             "<!DOCTYPE html>
 <html>
  <head>
-  <link rel=\"stylesheet\" href=\"static/style.css\">
+  <link rel=\"stylesheet\" href=\"/static/style.css\">
  </head>
  <body>
   <h1>{}</h1>
@@ -151,7 +151,7 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
             "<!DOCTYPE html>
 <html>
  <head>
-  <link rel=\"stylesheet\" href=\"static/style.css\">
+  <link rel=\"stylesheet\" href=\"/static/style.css\">
  </head>
  <body>
   <h1>Unknown Character {}!</h1>
