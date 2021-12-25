@@ -132,7 +132,7 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
   <p><b>Birth Date:</b> {}</p>{}
   <p><b>Age:</b> {}</p>
   <h2>Relations</h2>{}{}{}
-  </ul>  <a href=\"/character\">Back</a>
+  <a href=\"/character\">Back</a>
  </body>
 </html>
 ",
