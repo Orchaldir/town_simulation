@@ -1,6 +1,7 @@
 extern crate derive_more;
 
 use crate::generation::name::character::CharacterNameGenerator;
+use crate::model::building::BuildingMgr;
 use crate::model::character::CharacterMgr;
 use crate::model::time::Date;
 
@@ -10,6 +11,7 @@ pub mod simulation;
 pub mod usecase;
 
 pub struct SimulationData {
+    pub building_manager: BuildingMgr,
     pub character_manager: CharacterMgr,
     pub character_name_generator: CharacterNameGenerator,
     pub date: Date,
