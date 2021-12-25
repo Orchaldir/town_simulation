@@ -2,6 +2,7 @@
 extern crate rocket;
 
 use crate::init::init_simulation;
+use crate::visualize::visualize_overview;
 use rocket::fs::FileServer;
 use rocket::response::content::Html;
 use rocket::response::Redirect;
@@ -17,6 +18,7 @@ use town_simulation::usecase::character::relation::get::{
 use town_simulation::SimulationData;
 
 pub mod init;
+pub mod visualize;
 
 struct ViewerData {
     data: Mutex<SimulationData>,
@@ -25,25 +27,7 @@ struct ViewerData {
 #[get("/")]
 fn get_overview(data: &State<ViewerData>) -> Html<String> {
     let data = data.data.lock().expect("lock shared data");
-    Html(format!(
-        "<!DOCTYPE html>
-<html>
- <head>
-  <link rel=\"stylesheet\" href=\"/static/style.css\">
- </head>
- <body>
-  <h1>Town Simulation</h1>
-  <h2>Overview</h2>
-  <p><b>Year:</b> {}</p>
-  <p><b>Characters</b>: <a href=\"/character\">{}</a></p>
-  <h2>Actions</h2>
-  <p><a href=\"/simulate\">Simulate</a></p>
- </body>
-</html>
-",
-        data.date.get_year(),
-        data.character_manager.get_all().len()
-    ))
+    Html(visualize_overview(&data))
 }
 
 #[get("/simulate")]
