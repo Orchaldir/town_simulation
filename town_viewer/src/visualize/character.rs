@@ -75,10 +75,21 @@ fn show_character_list(characters: &[Character], date: Date) -> String {
 
 fn show_character_in_list(character: &Character, date: Date) -> String {
     format!(
-        "   <li><a href=\"/character/{}\">{}</a> (Age: {})</li>",
+        "   <li>{} (Age: {})</li>",
+        show_character_link(character),
+        character.get_age(date),
+    )
+}
+
+pub fn show_character_id_link(manager: &CharacterMgr, id: CharacterId) -> String {
+    show_character_link(manager.get(id).unwrap())
+}
+
+pub fn show_character_link(character: &Character) -> String {
+    format!(
+        "<a href=\"/character/{}\">{}</a>",
         character.id().id(),
         show_character_name(character),
-        character.get_age(date),
     )
 }
 

@@ -2,7 +2,7 @@
 extern crate rocket;
 
 use crate::init::init_simulation;
-use crate::visualize::building::visualize_buildings;
+use crate::visualize::building::{visualize_building, visualize_buildings};
 use crate::visualize::character::{visualize_character, visualize_characters};
 use crate::visualize::visualize_overview;
 use rocket::fs::FileServer;
@@ -40,6 +40,12 @@ fn get_buildings(data: &State<ViewerData>) -> Html<String> {
     Html(visualize_buildings(&data))
 }
 
+#[get("/<id>")]
+fn get_building(id: usize, data: &State<ViewerData>) -> Html<String> {
+    let data = data.data.lock().expect("lock shared data");
+    Html(visualize_building(&data, id))
+}
+
 #[get("/")]
 fn get_characters(data: &State<ViewerData>) -> Html<String> {
     let data = data.data.lock().expect("lock shared data");
@@ -64,7 +70,7 @@ async fn main() {
         .manage(data)
         .mount("/static", FileServer::from("town_viewer/static/"))
         .mount("/", routes![get_overview, simulate])
-        .mount("/building", routes![get_buildings])
+        .mount("/building", routes![get_buildings, get_building])
         .mount("/character", routes![get_characters, get_character])
         .launch()
         .await
