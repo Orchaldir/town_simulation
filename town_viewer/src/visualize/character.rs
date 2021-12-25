@@ -58,7 +58,7 @@ pub fn visualize_character(data: &SimulationData, id: usize) -> String {
         html(format!(
             "
   <h1>Unknown Character {}!</h1>
-  <a href=\"/\">Back</a>",
+  <a href=\"/character\">Back</a>",
             id,
         ))
     }

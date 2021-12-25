@@ -31,10 +31,15 @@ pub fn init_simulation(mut start_date: Date, years: u32, characters: u32) -> Sim
 
 fn init_buildings(date: Date) -> BuildingMgr {
     let mut manager = BuildingMgr::default();
-    let character_id = CharacterId::new(0);
-    let usage = BuildingUsage::House(Home::new(vec![character_id]));
+    let id0 = CharacterId::new(0);
+    let id1 = CharacterId::new(1);
+    let id2 = CharacterId::new(2);
+    let id3 = CharacterId::new(3);
+    let usage0 = BuildingUsage::House(Home::new(vec![id0, id1]));
+    let usage1 = BuildingUsage::Apartments(vec![Home::new(vec![id2]), Home::new(vec![id3])]);
 
-    manager.create(usage, date, character_id, character_id);
+    manager.create(usage0, date, id0, id0);
+    manager.create(usage1, date, id0, id2);
 
     manager
 }
