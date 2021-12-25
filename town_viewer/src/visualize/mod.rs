@@ -1,5 +1,7 @@
 use town_simulation::SimulationData;
 
+pub mod character;
+
 pub fn html(body: String) -> String {
     format!(
         "<!DOCTYPE html>
