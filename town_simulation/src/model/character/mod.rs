@@ -69,8 +69,7 @@ impl Character {
         } else {
             date
         }
-        .get_year()
-            - self.birth_date.get_year()
+        .get_years_since(self.birth_date)
     }
 
     pub fn set_birth_date(&mut self, birth_date: Date) {

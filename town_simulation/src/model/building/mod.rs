@@ -25,6 +25,10 @@ pub struct Building {
 }
 
 impl Building {
+    pub fn get_age(&self, date: Date) -> u32 {
+        date.get_years_since(self.construction_date)
+    }
+
     pub fn get_usage_mut(&mut self) -> &mut BuildingUsage {
         &mut self.usage
     }
@@ -63,5 +67,25 @@ impl BuildingMgr {
 
     pub fn get_mut(&mut self, id: BuildingId) -> Option<&mut Building> {
         self.buildings.get_mut(id.0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_age() {
+        let id = BuildingId::new(0);
+        let character_id = CharacterId::new(0);
+        let building = Building::new(
+            id,
+            BuildingUsage::house(),
+            Date::new(10),
+            character_id,
+            character_id,
+        );
+
+        assert_eq!(building.get_age(Date::new(52)), 42);
     }
 }

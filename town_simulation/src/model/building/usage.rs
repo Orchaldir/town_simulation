@@ -2,7 +2,7 @@ use crate::model::character::CharacterId;
 use derive_getters::Getters;
 use derive_more::Constructor;
 
-#[derive(Constructor, Getters, Clone, Debug, PartialEq)]
+#[derive(Constructor, Default, Getters, Clone, Debug, PartialEq)]
 pub struct Home {
     occupants: Vec<CharacterId>,
 }
@@ -11,4 +11,10 @@ pub struct Home {
 pub enum BuildingUsage {
     Apartments(Vec<Home>),
     House(Home),
+}
+
+impl BuildingUsage {
+    pub fn house() -> Self {
+        BuildingUsage::House(Home::default())
+    }
 }
