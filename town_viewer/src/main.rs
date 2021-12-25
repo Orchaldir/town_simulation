@@ -2,7 +2,7 @@
 extern crate rocket;
 
 use crate::init::init_simulation;
-use crate::visualize::visualize_overview;
+use crate::visualize::{html, visualize_overview};
 use rocket::fs::FileServer;
 use rocket::response::content::Html;
 use rocket::response::Redirect;
@@ -44,13 +44,8 @@ fn get_characters(data: &State<ViewerData>) -> Html<String> {
     let total = manager.get_all().len();
     let alive = manager.get_all().iter().filter(|&c| c.is_alive()).count();
     let dead = total - alive;
-    Html(format!(
-        "<!DOCTYPE html>
-<html>
- <head>
-  <link rel=\"stylesheet\" href=\"/static/style.css\">
- </head>
- <body>
+    Html(html(format!(
+        "
   <h1>Characters</h1>
   <p><b>Alive:</b> {}</p>
   <p><b>Dead:</b> {}</p>
@@ -58,15 +53,12 @@ fn get_characters(data: &State<ViewerData>) -> Html<String> {
   <ul>
     {}
   </ul>
-  <p><a href=\"/\">Back</a></p>
- </body>
-</html>
-",
+  <p><a href=\"/\">Back</a></p>",
         alive,
         dead,
         total,
         show_character_list(manager.get_all(), lock.date),
-    ))
+    )))
 }
 
 fn show_character_list(characters: &[Character], date: Date) -> String {
@@ -102,13 +94,8 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
     let character_id = CharacterId::new(id);
 
     if let Some(character) = manager.get(character_id) {
-        Html(format!(
-            "<!DOCTYPE html>
-<html>
- <head>
-  <link rel=\"stylesheet\" href=\"/static/style.css\">
- </head>
- <body>
+        Html(html(format!(
+            "
   <h1>{}</h1>
   <h2>General</h2>
   <p><b>Id:</b> {}</p>
@@ -116,10 +103,7 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
   <p><b>Birth Date:</b> {}</p>{}
   <p><b>Age:</b> {}</p>
   <h2>Relations</h2>{}{}{}
-  <a href=\"/character\">Back</a>
- </body>
-</html>
-",
+  <a href=\"/character\">Back</a>",
             character.name(),
             id,
             character.gender(),
@@ -129,22 +113,14 @@ fn get_character(id: usize, data: &State<ViewerData>) -> Html<String> {
             show_spouse(manager, character_id),
             show_relatives(manager, character_id),
             show_in_laws(manager, character_id),
-        ))
+        )))
     } else {
-        Html(format!(
-            "<!DOCTYPE html>
-<html>
- <head>
-  <link rel=\"stylesheet\" href=\"/static/style.css\">
- </head>
- <body>
+        Html(html(format!(
+            "
   <h1>Unknown Character {}!</h1>
-  <a href=\"/\">Back</a>
- </body>
-</html>
-",
+  <a href=\"/\">Back</a>",
             id,
-        ))
+        )))
     }
 }
 
