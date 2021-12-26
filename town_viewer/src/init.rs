@@ -1,8 +1,9 @@
 use town_simulation::generation::name::character::CharacterNameGenerator;
 use town_simulation::model::building::usage::{BuildingUsage, Home};
-use town_simulation::model::building::BuildingMgr;
+use town_simulation::model::building::{BuildingId, BuildingMgr};
 use town_simulation::model::character::{CharacterId, CharacterMgr};
 use town_simulation::model::time::Date;
+use town_simulation::model::town::map::TownMap;
 use town_simulation::simulation::simulate_year;
 use town_simulation::usecase::character::birth::set_birth_date;
 use town_simulation::usecase::character::{set_gender_based_on_id, set_generated_name};
@@ -20,6 +21,7 @@ pub fn init_simulation(mut start_date: Date, years: u32, characters: u32) -> Sim
         character_manager,
         character_name_generator,
         date: start_date,
+        map: init_town(),
     };
 
     for _i in 0..years {
@@ -42,6 +44,15 @@ fn init_buildings(date: Date) -> BuildingMgr {
     manager.create(usage1, date, id0, id2);
 
     manager
+}
+
+fn init_town() -> TownMap {
+    let mut town = TownMap::empty(6, 5);
+
+    town.add_building(BuildingId::new(0), 7, 0);
+    town.add_building(BuildingId::new(1), 7, 1);
+
+    town
 }
 
 fn init_characters(names: &CharacterNameGenerator, date: Date, characters: u32) -> CharacterMgr {

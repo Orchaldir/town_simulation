@@ -62,6 +62,11 @@ impl TownMap {
         true
     }
 
+    pub fn get_block(&self, row: usize, column: usize) -> &TownBlock {
+        let index = row * self.width + column;
+        &self.blocks[index]
+    }
+
     pub fn get_building(&self, block: usize, lot: usize) -> Option<BuildingId> {
         if let Some(SmallBuildings(buildings)) = self.blocks.get(block) {
             if let BuildingLot(building) = buildings[lot] {
