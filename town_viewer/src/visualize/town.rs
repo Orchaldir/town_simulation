@@ -1,4 +1,6 @@
+use crate::visualize::building::show_building_id_link;
 use crate::visualize::html;
+use town_simulation::model::town::map::{TownBlock, TownLot};
 use town_simulation::SimulationData;
 
 pub fn visualize_town(data: &SimulationData) -> String {
@@ -44,9 +46,39 @@ pub fn visualize_block(data: &SimulationData, row: usize, column: usize) -> Stri
 
     format!(
         "
-   <td>
-    {:?}
+   <td class=\"block\">
+    {}
    </td>",
-        block,
+        match block {
+            TownBlock::EmptyBlock => "E".to_string(),
+            TownBlock::SmallBuildings(buildings) => visualize_town_lots(data, buildings),
+        },
     )
+}
+
+pub fn visualize_town_lots(data: &SimulationData, town_lots: &[TownLot; 4]) -> String {
+    format!(
+        "
+<table class=\"lots\">
+ <tr>
+  <td class=\"lot\">{}</td>
+  <td class=\"lot\">{}</td>
+ </tr>
+ <tr>
+  <td class=\"lot\">{}</td>
+  <td class=\"lot\">{}</td>
+ </tr>
+</table>",
+        visualize_town_lot(data, &town_lots[0]),
+        visualize_town_lot(data, &town_lots[1]),
+        visualize_town_lot(data, &town_lots[2]),
+        visualize_town_lot(data, &town_lots[3]),
+    )
+}
+
+pub fn visualize_town_lot(data: &SimulationData, town_lot: &TownLot) -> String {
+    match town_lot {
+        TownLot::EmptyLot => "E".to_string(),
+        TownLot::BuildingLot(id) => show_building_id_link(&data.building_manager, *id),
+    }
 }
