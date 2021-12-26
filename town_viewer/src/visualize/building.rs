@@ -77,7 +77,7 @@ pub fn show_building_id_link(manager: &BuildingMgr, id: BuildingId) -> String {
 }
 
 pub fn show_building_link(building: &Building) -> String {
-    format!("<a href=\"/building/{0}\">{0}</a>", building.id().id(),)
+    format!("<a href=\"/building/{0}\">{0}</a>", building.id().id())
 }
 
 fn show_usage(manager: &CharacterMgr, usage: &BuildingUsage) -> String {

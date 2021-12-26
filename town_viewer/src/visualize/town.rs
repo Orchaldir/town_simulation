@@ -1,5 +1,6 @@
-use crate::visualize::building::show_building_id_link;
 use crate::visualize::html;
+use town_simulation::model::building::usage::BuildingUsage;
+use town_simulation::model::building::BuildingId;
 use town_simulation::model::town::map::{TownBlock, TownLot};
 use town_simulation::SimulationData;
 
@@ -79,6 +80,23 @@ pub fn visualize_town_lots(data: &SimulationData, town_lots: &[TownLot; 4]) -> S
 pub fn visualize_town_lot(data: &SimulationData, town_lot: &TownLot) -> String {
     match town_lot {
         TownLot::EmptyLot => "E".to_string(),
-        TownLot::BuildingLot(id) => show_building_id_link(&data.building_manager, *id),
+        TownLot::BuildingLot(id) => visualize_building(data, *id),
     }
+}
+
+pub fn visualize_building(data: &SimulationData, id: BuildingId) -> String {
+    let building = data.building_manager.get(id).unwrap();
+
+    format!(
+        "<a href=\"/building/{}\">{}</a>",
+        building.id().id(),
+        match building.usage() {
+            BuildingUsage::Apartments(_) => visualize_icon("apartment"),
+            BuildingUsage::House(_) => visualize_icon("house"),
+        }
+    )
+}
+
+pub fn visualize_icon(icon: &str) -> String {
+    format!("<img src=\"static/icons/{0}.svg\" alt=\"{0}\">", icon)
 }
