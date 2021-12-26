@@ -62,6 +62,16 @@ impl TownMap {
         true
     }
 
+    pub fn get_building(&self, block: usize, lot: usize) -> Option<BuildingId> {
+        if let Some(SmallBuildings(buildings)) = self.blocks.get(block) {
+            if let BuildingLot(building) = buildings[lot] {
+                return Some(building);
+            }
+        }
+
+        None
+    }
+
     pub fn add_building(&mut self, id: BuildingId, block: usize, lot: usize) {
         if self.blocks[block] == EmptyBlock {
             self.blocks[block] = TownBlock::empty();
@@ -99,8 +109,63 @@ mod tests {
         assert!(map.is_lot_free(0, 3));
 
         assert!(map.is_lot_free(1, 0));
-        assert!(!map.is_lot_free(1, 1));
+        assert_eq!(map.is_lot_free(1, 1), false);
         assert!(map.is_lot_free(1, 2));
         assert!(map.is_lot_free(1, 3));
+    }
+
+    #[test]
+    fn get_building() {
+        let id = BuildingId::new(42);
+        let block = SmallBuildings([EmptyLot, EmptyLot, BuildingLot(id), EmptyLot]);
+        let map = TownMap::new(2, 1, vec![EmptyBlock, block]);
+
+        assert_eq!(map.get_building(0, 0), None);
+        assert_eq!(map.get_building(0, 1), None);
+        assert_eq!(map.get_building(0, 2), None);
+        assert_eq!(map.get_building(0, 3), None);
+
+        assert_eq!(map.get_building(1, 0), None);
+        assert_eq!(map.get_building(1, 1), None);
+        assert_eq!(map.get_building(1, 2), Some(id));
+        assert_eq!(map.get_building(1, 3), None);
+    }
+
+    #[test]
+    fn add_building() {
+        let id = BuildingId::new(42);
+        let mut map = TownMap::new(2, 1, vec![EmptyBlock, EmptyBlock]);
+
+        map.add_building(id, 0, 3);
+
+        assert_eq!(map.get_building(0, 0), None);
+        assert_eq!(map.get_building(0, 1), None);
+        assert_eq!(map.get_building(0, 2), None);
+        assert_eq!(map.get_building(0, 3), Some(id));
+
+        assert_eq!(map.get_building(1, 0), None);
+        assert_eq!(map.get_building(1, 1), None);
+        assert_eq!(map.get_building(1, 2), None);
+        assert_eq!(map.get_building(1, 3), None);
+    }
+
+    #[test]
+    fn add_second_building_to_a_block() {
+        let id0 = BuildingId::new(42);
+        let id1 = BuildingId::new(43);
+        let block = SmallBuildings([EmptyLot, EmptyLot, BuildingLot(id0), EmptyLot]);
+        let mut map = TownMap::new(2, 1, vec![EmptyBlock, block]);
+
+        map.add_building(id1, 1, 0);
+
+        assert_eq!(map.get_building(0, 0), None);
+        assert_eq!(map.get_building(0, 1), None);
+        assert_eq!(map.get_building(0, 2), None);
+        assert_eq!(map.get_building(0, 3), None);
+
+        assert_eq!(map.get_building(1, 0), Some(id1));
+        assert_eq!(map.get_building(1, 1), None);
+        assert_eq!(map.get_building(1, 2), Some(id0));
+        assert_eq!(map.get_building(1, 3), None);
     }
 }
