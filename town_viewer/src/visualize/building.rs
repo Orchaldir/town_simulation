@@ -1,7 +1,7 @@
 use crate::visualize::character::show_character_id_link;
 use crate::visualize::html;
 use town_simulation::model::building::usage::{BuildingUsage, Home};
-use town_simulation::model::building::{Building, BuildingId};
+use town_simulation::model::building::{Building, BuildingId, BuildingMgr};
 use town_simulation::model::character::{CharacterId, CharacterMgr};
 use town_simulation::model::time::Date;
 use town_simulation::SimulationData;
@@ -66,10 +66,18 @@ fn show_building_list(building: &[Building], date: Date) -> String {
 
 fn show_building_in_list(building: &Building, date: Date) -> String {
     format!(
-        "   <li><a href=\"/building/{0}\">{0}</a> (Age: {1})</li>",
-        building.id().id(),
+        "   <li>{} (Age: {})</li>",
+        show_building_link(building),
         building.get_age(date),
     )
+}
+
+pub fn show_building_id_link(manager: &BuildingMgr, id: BuildingId) -> String {
+    show_building_link(manager.get(id).unwrap())
+}
+
+pub fn show_building_link(building: &Building) -> String {
+    format!("<a href=\"/building/{0}\">{0}</a>", building.id().id())
 }
 
 fn show_usage(manager: &CharacterMgr, usage: &BuildingUsage) -> String {

@@ -2,3 +2,20 @@ h1 {
   text-align: center;
   color: blue;
 }
+
+td.block {
+  border: 1px solid black;
+  height: 100px;
+  width: 100px;
+  text-align: center;
+}
+
+table.lots {
+  width:100%;
+  height:100%;
+}
+
+td.lot {
+  border: 1px solid black;
+  text-align: center;
+}
