@@ -4,6 +4,10 @@ use derive_more::Constructor;
 pub struct Date(u32);
 
 impl Date {
+    pub fn get_years_since(&self, date: Date) -> u32 {
+        self.0 - date.0
+    }
+
     pub fn get_year(&self) -> u32 {
         self.0
     }
