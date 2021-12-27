@@ -1,9 +1,10 @@
 use crate::model::building::usage::BuildingUsage;
-use crate::model::building::BuildingId;
+use crate::model::building::{BuildingId, BuildingMgr};
 use crate::model::character::relation::building::BuildingRelation;
 use crate::model::character::relation::building::BuildingRelationType::{Builder, Owner};
-use crate::model::character::CharacterId;
+use crate::model::character::{CharacterId, CharacterMgr};
 use crate::SimulationData;
+use std::collections::HashSet;
 
 pub fn build(
     data: &mut SimulationData,
@@ -34,4 +35,52 @@ pub fn build(
         .push(owner_relation);
 
     building_id
+}
+
+pub fn get_builder(manager: &BuildingMgr, id: BuildingId) -> CharacterId {
+    *manager.get(id).unwrap().builder()
+}
+
+pub fn get_buildings_build_by(manager: &CharacterMgr, id: CharacterId) -> HashSet<BuildingId> {
+    manager
+        .get(id)
+        .unwrap()
+        .building_relations()
+        .iter()
+        .filter(|&relation| *relation.relation_type() == Builder)
+        .map(|relation| *relation.id())
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::util::assert::assert;
+
+    #[test]
+    fn test_builder() {
+        let mut data = SimulationData::default();
+        let builder = data.character_manager.create();
+        let owner = data.character_manager.create();
+
+        let building = build(&mut data, 1, 2, BuildingUsage::house(), builder, owner);
+
+        assert_eq!(get_builder(&data.building_manager, building), builder);
+        assert(
+            get_buildings_build_by(&data.character_manager, builder),
+            [building],
+        );
+        assert!(get_buildings_build_by(&data.character_manager, owner).is_empty());
+    }
+
+    #[test]
+    fn building_is_added_to_town() {
+        let mut data = SimulationData::default();
+        let builder = data.character_manager.create();
+        let owner = data.character_manager.create();
+
+        let building = build(&mut data, 1, 2, BuildingUsage::house(), builder, owner);
+
+        assert_eq!(data.map.get_building(1, 2), Some(building));
+    }
 }

@@ -98,6 +98,12 @@ impl TownMap {
     }
 }
 
+impl Default for TownMap {
+    fn default() -> Self {
+        Self::empty(2, 2)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

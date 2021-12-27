@@ -82,9 +82,7 @@ mod tests {
     use crate::model::character::relation::character::CharacterRelationType::{InLaw, Relative};
     use crate::usecase::character::relation::get::{get_relation_to_in_laws, get_spouses};
     use crate::usecase::character::{get_name, set_name};
-    use std::collections::HashSet;
-    use std::fmt::Debug;
-    use std::hash::Hash;
+    use crate::util::assert::assert;
 
     #[test]
     fn husband_and_wife_are_spouses() {
@@ -204,9 +202,5 @@ mod tests {
                 character
             )]
         );
-    }
-
-    fn assert<T: Eq + Hash + Debug, const N: usize>(left: HashSet<T>, right: [T; N]) {
-        assert_eq!(left, right.into());
     }
 }

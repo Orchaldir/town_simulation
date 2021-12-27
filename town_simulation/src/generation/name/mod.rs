@@ -11,6 +11,7 @@ pub struct Entry {
     value: u32,
 }
 
+#[derive(Default, Debug)]
 pub struct NameGenerator {
     entries: Vec<Entry>,
     total_value: u32,
