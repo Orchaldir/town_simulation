@@ -173,4 +173,15 @@ mod tests {
         assert_eq!(map.get_building(1, 2), Some(id0));
         assert_eq!(map.get_building(1, 3), None);
     }
+
+    #[test]
+    #[should_panic]
+    fn add_second_building_to_a_lots() {
+        let id0 = BuildingId::new(42);
+        let id1 = BuildingId::new(43);
+        let block = SmallBuildings([EmptyLot, EmptyLot, BuildingLot(id0), EmptyLot]);
+        let mut map = TownMap::new(2, 1, vec![EmptyBlock, block]);
+
+        map.add_building(id1, 1, 2);
+    }
 }

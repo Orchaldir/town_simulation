@@ -79,6 +79,10 @@ impl Character {
 
         self.death_date = Some(death_date);
     }
+
+    pub fn get_building_relations_mut(&mut self) -> &mut Vec<BuildingRelation> {
+        &mut self.building_relations
+    }
 }
 
 #[derive(Default, Debug)]
