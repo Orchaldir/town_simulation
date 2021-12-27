@@ -1,5 +1,5 @@
-use crate::model::character::relation::Relation;
-use crate::model::character::relation::RelationType::Spouse;
+use crate::model::character::relation::character::Relation;
+use crate::model::character::relation::character::RelationType::Spouse;
 use crate::model::character::{Character, CharacterId, CharacterMgr};
 use crate::usecase::character::relation::get::{get_relation_to_relatives, get_spouses};
 use crate::usecase::character::{add_relation, add_relations};
@@ -77,9 +77,9 @@ fn update_names(manager: &mut CharacterMgr, id0: CharacterId, id1: CharacterId) 
 mod tests {
     use super::*;
     use crate::model::character::name::CharacterName;
-    use crate::model::character::relation::family::RelativeType;
-    use crate::model::character::relation::family::RelativeType::{Child, Parent};
-    use crate::model::character::relation::RelationType::{InLaw, Relative};
+    use crate::model::character::relation::character::family::RelativeType;
+    use crate::model::character::relation::character::family::RelativeType::{Child, Parent};
+    use crate::model::character::relation::character::RelationType::{InLaw, Relative};
     use crate::usecase::character::relation::get::{get_relation_to_in_laws, get_spouses};
     use crate::usecase::character::{get_name, set_name};
     use std::collections::HashSet;

@@ -1,7 +1,7 @@
 use crate::generation::name::character::CharacterNameGenerator;
 use crate::model::character::gender::Gender;
 use crate::model::character::name::CharacterName;
-use crate::model::character::relation::{Relation, RelationType};
+use crate::model::character::relation::character::{Relation, RelationType};
 use crate::model::character::{CharacterId, CharacterMgr};
 use std::collections::HashSet;
 

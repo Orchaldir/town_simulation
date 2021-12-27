@@ -1,4 +1,4 @@
-use crate::model::character::relation::RelationType;
+use crate::model::character::relation::character::RelationType;
 use crate::model::character::{CharacterId, CharacterMgr};
 
 pub fn get_relation(
@@ -24,8 +24,8 @@ pub fn is_relative(manager: &CharacterMgr, id0: CharacterId, id1: CharacterId) -
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::character::relation::family::RelativeType::*;
-    use crate::model::character::relation::RelationType::*;
+    use crate::model::character::relation::character::family::RelativeType::*;
+    use crate::model::character::relation::character::RelationType::*;
     use crate::usecase::character::birth::birth;
 
     #[test]

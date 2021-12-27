@@ -1,5 +1,5 @@
 use crate::visualize::html;
-use town_simulation::model::character::relation::Relation;
+use town_simulation::model::character::relation::character::Relation;
 use town_simulation::model::character::{Character, CharacterId, CharacterMgr};
 use town_simulation::model::time::Date;
 use town_simulation::usecase::character::relation::get::{

@@ -1,6 +1,6 @@
 use crate::model::character::gender::Gender;
 use crate::model::character::name::CharacterName;
-use crate::model::character::relation::Relation;
+use crate::model::character::relation::character::Relation;
 use crate::model::time::Date;
 use derive_more::Constructor;
 

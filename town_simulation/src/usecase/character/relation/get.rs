@@ -1,5 +1,5 @@
-use crate::model::character::relation::family::RelativeType;
-use crate::model::character::relation::{Relation, RelationType};
+use crate::model::character::relation::character::family::RelativeType;
+use crate::model::character::relation::character::{Relation, RelationType};
 use crate::model::character::{CharacterId, CharacterMgr};
 use std::collections::HashSet;
 use RelativeType::*;
