@@ -3,6 +3,7 @@ use crate::model::character::name::CharacterName;
 use crate::model::character::relation::building::BuildingRelation;
 use crate::model::character::relation::character::CharacterRelation;
 use crate::model::time::Date;
+use derive_getters::Getters;
 use derive_more::Constructor;
 
 pub mod gender;
@@ -18,7 +19,7 @@ impl CharacterId {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Getters, Clone, Debug, PartialEq)]
 pub struct Character {
     id: CharacterId,
     name: CharacterName,
@@ -42,28 +43,12 @@ impl Character {
         }
     }
 
-    pub fn id(&self) -> &CharacterId {
-        &self.id
-    }
-
-    pub fn name(&self) -> &CharacterName {
-        &self.name
-    }
-
     pub fn set_name(&mut self, name: CharacterName) {
         self.name = name;
     }
 
-    pub fn gender(&self) -> &Gender {
-        &self.gender
-    }
-
     pub fn set_gender(&mut self, gender: Gender) {
         self.gender = gender;
-    }
-
-    pub fn birth_date(&self) -> &Date {
-        &self.birth_date
     }
 
     pub fn get_age(&self, date: Date) -> u32 {
@@ -85,10 +70,6 @@ impl Character {
 
     pub fn is_dead(&self) -> bool {
         self.death_date.is_some()
-    }
-
-    pub fn death_date(&self) -> &Option<Date> {
-        &self.death_date
     }
 
     pub fn set_death_date(&mut self, death_date: Date) {
