@@ -55,10 +55,11 @@ pub fn get_buildings_build_by(manager: &CharacterMgr, id: CharacterId) -> HashSe
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::usecase::building::ownership::{get_buildings_owned_by, get_owner};
     use crate::util::assert::assert;
 
     #[test]
-    fn test_builder() {
+    fn test_relations() {
         let mut data = SimulationData::default();
         let builder = data.character_manager.create();
         let owner = data.character_manager.create();
@@ -66,11 +67,19 @@ mod tests {
         let building = build(&mut data, 1, 2, BuildingUsage::house(), builder, owner);
 
         assert_eq!(get_builder(&data.building_manager, building), builder);
+        assert_eq!(get_owner(&data.building_manager, building), owner);
+
         assert(
             get_buildings_build_by(&data.character_manager, builder),
             [building],
         );
         assert!(get_buildings_build_by(&data.character_manager, owner).is_empty());
+
+        assert(
+            get_buildings_owned_by(&data.character_manager, owner),
+            [building],
+        );
+        assert!(get_buildings_owned_by(&data.character_manager, builder).is_empty());
     }
 
     #[test]
