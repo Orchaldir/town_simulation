@@ -1,4 +1,7 @@
+use crate::visualize::building::show_building_id_link;
 use crate::visualize::html;
+use town_simulation::model::building::BuildingMgr;
+use town_simulation::model::character::relation::building::BuildingRelation;
 use town_simulation::model::character::relation::character::CharacterRelation;
 use town_simulation::model::character::{Character, CharacterId, CharacterMgr};
 use town_simulation::model::time::Date;
@@ -42,7 +45,11 @@ pub fn visualize_character(data: &SimulationData, id: usize) -> String {
   <p><b>Gender:</b> {:?}</p>
   <p><b>Birth Date:</b> {}</p>{}
   <p><b>Age:</b> {}</p>
-  <h2>Relations</h2>{}{}{}
+  <h2>Characters</h2>{}{}{}
+  <h2>Buildings</h2>
+  <ul>
+    {}
+  </ul>
   <a href=\"/character\">Back</a>",
             character.name(),
             id,
@@ -53,6 +60,7 @@ pub fn visualize_character(data: &SimulationData, id: usize) -> String {
             show_spouse(manager, character_id),
             show_relatives(manager, character_id),
             show_in_laws(manager, character_id),
+            show_building_relations(&data.building_manager, character.building_relations()),
         ))
     } else {
         html(format!(
@@ -161,5 +169,22 @@ fn show_relation(manager: &CharacterMgr, relation: &CharacterRelation) -> String
         relation
             .relation_type()
             .get_gender_specific_string(*other.gender()),
+    )
+}
+
+fn show_building_relations(manager: &BuildingMgr, relations: &[BuildingRelation]) -> String {
+    let vector: Vec<String> = relations
+        .iter()
+        .map(|relation| show_building_relation(manager, relation))
+        .collect();
+
+    vector.join("\n")
+}
+
+fn show_building_relation(manager: &BuildingMgr, relation: &BuildingRelation) -> String {
+    format!(
+        "   <li>{:?} of {}</li>",
+        relation.relation_type(),
+        show_building_id_link(manager, *relation.id()),
     )
 }
