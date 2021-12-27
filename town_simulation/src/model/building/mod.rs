@@ -33,6 +33,15 @@ impl Building {
         &mut self.usage
     }
 
+    pub fn remove_occupant(&mut self, id: CharacterId) {
+        match &mut self.usage {
+            BuildingUsage::Apartments(homes) => {
+                homes.iter_mut().for_each(|home| home.remove_occupant(id))
+            }
+            BuildingUsage::House(home) => home.remove_occupant(id),
+        }
+    }
+
     pub fn update_owner(&mut self, owner: CharacterId) {
         self.owner = owner;
     }

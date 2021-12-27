@@ -17,6 +17,10 @@ impl Home {
     pub fn get_occupants_mut(&mut self) -> &mut Vec<CharacterId> {
         &mut self.occupants
     }
+
+    pub fn remove_occupant(&mut self, id: CharacterId) {
+        self.occupants.retain(|occupant_id| *occupant_id != id);
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
