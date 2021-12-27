@@ -1,6 +1,8 @@
+use crate::model::building::BuildingId;
 use crate::model::character::gender::Gender;
 use crate::model::character::name::CharacterName;
 use crate::model::character::relation::building::BuildingRelation;
+use crate::model::character::relation::building::BuildingRelationType::Occupant;
 use crate::model::character::relation::character::CharacterRelation;
 use crate::model::time::Date;
 use derive_getters::Getters;
@@ -82,6 +84,14 @@ impl Character {
 
     pub fn get_building_relations_mut(&mut self) -> &mut Vec<BuildingRelation> {
         &mut self.building_relations
+    }
+
+    pub fn relocate(&mut self, building_id: BuildingId) {
+        self.building_relations
+            .retain(|relation| *relation.relation_type() != Occupant);
+
+        self.building_relations
+            .push(BuildingRelation::new(Occupant, building_id));
     }
 }
 
