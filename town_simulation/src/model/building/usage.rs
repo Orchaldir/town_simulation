@@ -46,7 +46,7 @@ impl BuildingUsage {
 impl Display for BuildingUsage {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Apartments(_) => write!(f, "Apartments"),
+            Apartments(_) => write!(f, "Apartment Building"),
             House(_) => write!(f, "House"),
         }
     }

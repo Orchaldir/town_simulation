@@ -1,4 +1,4 @@
-use crate::visualize::building::show_building_id_link;
+use crate::visualize::building::show_building_link;
 use crate::visualize::html;
 use town_simulation::model::building::BuildingMgr;
 use town_simulation::model::character::relation::building::BuildingRelation;
@@ -182,9 +182,12 @@ fn show_building_relations(manager: &BuildingMgr, relations: &[BuildingRelation]
 }
 
 fn show_building_relation(manager: &BuildingMgr, relation: &BuildingRelation) -> String {
+    let building = manager.get(*relation.id()).unwrap();
+
     format!(
-        "   <li>{:?} of {}</li>",
+        "   <li>{:?} of {} {}</li>",
         relation.relation_type(),
-        show_building_id_link(manager, *relation.id()),
+        building.usage(),
+        show_building_link(building),
     )
 }
