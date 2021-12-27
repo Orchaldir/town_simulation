@@ -1,5 +1,5 @@
-use crate::model::character::relation::Relation;
-use crate::model::character::relation::RelationType::Spouse;
+use crate::model::character::relation::character::CharacterRelation;
+use crate::model::character::relation::character::CharacterRelationType::Spouse;
 use crate::model::character::{Character, CharacterId, CharacterMgr};
 use crate::usecase::character::relation::get::{get_relation_to_relatives, get_spouses};
 use crate::usecase::character::{add_relation, add_relations};
@@ -38,7 +38,7 @@ pub fn is_married(manager: &CharacterMgr, id: CharacterId) -> bool {
 
 fn is_character_married(character: &Character) -> bool {
     character
-        .relations
+        .character_relations
         .iter()
         .any(|&relation| *relation.relation_type() == Spouse)
 }
@@ -51,7 +51,7 @@ pub fn marry(manager: &mut CharacterMgr, id0: CharacterId, id1: CharacterId) {
 }
 
 fn update_in_laws(manager: &mut CharacterMgr, from: CharacterId, to: CharacterId) {
-    let in_laws: Vec<Relation> = get_relation_to_relatives(manager, from)
+    let in_laws: Vec<CharacterRelation> = get_relation_to_relatives(manager, from)
         .iter()
         .map(|&relation| relation.to_in_law())
         .flatten()
@@ -77,14 +77,12 @@ fn update_names(manager: &mut CharacterMgr, id0: CharacterId, id1: CharacterId) 
 mod tests {
     use super::*;
     use crate::model::character::name::CharacterName;
-    use crate::model::character::relation::family::RelativeType;
-    use crate::model::character::relation::family::RelativeType::{Child, Parent};
-    use crate::model::character::relation::RelationType::{InLaw, Relative};
+    use crate::model::character::relation::character::family::RelativeType;
+    use crate::model::character::relation::character::family::RelativeType::{Child, Parent};
+    use crate::model::character::relation::character::CharacterRelationType::{InLaw, Relative};
     use crate::usecase::character::relation::get::{get_relation_to_in_laws, get_spouses};
     use crate::usecase::character::{get_name, set_name};
-    use std::collections::HashSet;
-    use std::fmt::Debug;
-    use std::hash::Hash;
+    use crate::util::assert::assert;
 
     #[test]
     fn husband_and_wife_are_spouses() {
@@ -195,15 +193,14 @@ mod tests {
     ) {
         assert_eq!(
             get_relation_to_in_laws(&manager, character),
-            vec![&Relation::new(InLaw(in_law_type), in_law)]
+            vec![&CharacterRelation::new(InLaw(in_law_type), in_law)]
         );
         assert_eq!(
             get_relation_to_in_laws(&manager, in_law),
-            vec![&Relation::new(InLaw(in_law_type.reverse()), character)]
+            vec![&CharacterRelation::new(
+                InLaw(in_law_type.reverse()),
+                character
+            )]
         );
-    }
-
-    fn assert<T: Eq + Hash + Debug, const N: usize>(left: HashSet<T>, right: [T; N]) {
-        assert_eq!(left, right.into());
     }
 }

@@ -1,5 +1,5 @@
-use crate::model::character::relation::family::RelativeType;
-use crate::model::character::relation::{Relation, RelationType};
+use crate::model::character::relation::character::family::RelativeType;
+use crate::model::character::relation::character::{CharacterRelation, CharacterRelationType};
 use crate::model::character::{CharacterId, CharacterMgr};
 use std::collections::HashSet;
 use RelativeType::*;
@@ -66,11 +66,11 @@ pub fn get_siblings(manager: &CharacterMgr, character_id: CharacterId) -> HashSe
 pub fn get_relation_to_in_laws(
     manager: &CharacterMgr,
     character_id: CharacterId,
-) -> Vec<&Relation> {
+) -> Vec<&CharacterRelation> {
     manager
         .get(character_id)
         .unwrap()
-        .relations
+        .character_relations
         .iter()
         .filter(|&relation| relation.relation_type().is_in_law())
         .collect()
@@ -79,11 +79,11 @@ pub fn get_relation_to_in_laws(
 pub fn get_relation_to_relatives(
     manager: &CharacterMgr,
     character_id: CharacterId,
-) -> Vec<&Relation> {
+) -> Vec<&CharacterRelation> {
     manager
         .get(character_id)
         .unwrap()
-        .relations
+        .character_relations
         .iter()
         .filter(|&relation| relation.relation_type().is_relative())
         .collect()
@@ -101,21 +101,25 @@ fn get_relative(
     character_id: CharacterId,
     relative_type: RelativeType,
 ) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::Relative(relative_type))
+    get_direct_relation(
+        manager,
+        character_id,
+        CharacterRelationType::Relative(relative_type),
+    )
 }
 
 pub fn get_spouses(manager: &CharacterMgr, character_id: CharacterId) -> HashSet<CharacterId> {
-    get_direct_relation(manager, character_id, RelationType::Spouse)
+    get_direct_relation(manager, character_id, CharacterRelationType::Spouse)
 }
 
 fn get_direct_relation(
     manager: &CharacterMgr,
     character_id: CharacterId,
-    relation_type: RelationType,
+    relation_type: CharacterRelationType,
 ) -> HashSet<CharacterId> {
     if let Some(character) = manager.get(character_id) {
         return character
-            .relations
+            .character_relations
             .iter()
             .filter(|&relation| *relation.relation_type() == relation_type)
             .map(|relation| *relation.id())

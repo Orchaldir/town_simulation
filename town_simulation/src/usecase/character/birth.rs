@@ -1,6 +1,6 @@
-use crate::model::character::relation::family::RelativeType;
-use crate::model::character::relation::family::RelativeType::*;
-use crate::model::character::relation::RelationType::*;
+use crate::model::character::relation::character::family::RelativeType;
+use crate::model::character::relation::character::family::RelativeType::*;
+use crate::model::character::relation::character::CharacterRelationType::*;
 use crate::model::character::{CharacterId, CharacterMgr};
 use crate::model::time::Date;
 use crate::usecase::character::relation::get::*;

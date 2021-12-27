@@ -4,6 +4,7 @@ use crate::model::character::name::CharacterName;
 use crate::model::character::{CharacterId, CharacterMgr};
 use crate::usecase::character::relation::get::get_parents;
 
+#[derive(Default, Debug)]
 pub struct CharacterNameGenerator {
     male_names: NameGenerator,
     female_names: NameGenerator,

@@ -10,7 +10,9 @@ pub mod generation;
 pub mod model;
 pub mod simulation;
 pub mod usecase;
+pub mod util;
 
+#[derive(Default, Debug)]
 pub struct SimulationData {
     pub building_manager: BuildingMgr,
     pub character_manager: CharacterMgr,

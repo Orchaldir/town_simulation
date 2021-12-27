@@ -1,7 +1,11 @@
+use crate::model::building::BuildingId;
 use crate::model::character::gender::Gender;
 use crate::model::character::name::CharacterName;
-use crate::model::character::relation::Relation;
+use crate::model::character::relation::building::BuildingRelation;
+use crate::model::character::relation::building::BuildingRelationType::Occupant;
+use crate::model::character::relation::character::CharacterRelation;
 use crate::model::time::Date;
+use derive_getters::Getters;
 use derive_more::Constructor;
 
 pub mod gender;
@@ -17,14 +21,15 @@ impl CharacterId {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Getters, Clone, Debug, PartialEq)]
 pub struct Character {
     id: CharacterId,
     name: CharacterName,
     gender: Gender,
     birth_date: Date,
     death_date: Option<Date>,
-    pub relations: Vec<Relation>,
+    pub character_relations: Vec<CharacterRelation>,
+    building_relations: Vec<BuildingRelation>,
 }
 
 impl Character {
@@ -35,32 +40,17 @@ impl Character {
             gender: Gender::default(),
             birth_date: Date::default(),
             death_date: None,
-            relations: Vec::new(),
+            character_relations: Vec::new(),
+            building_relations: Vec::new(),
         }
-    }
-
-    pub fn id(&self) -> &CharacterId {
-        &self.id
-    }
-
-    pub fn name(&self) -> &CharacterName {
-        &self.name
     }
 
     pub fn set_name(&mut self, name: CharacterName) {
         self.name = name;
     }
 
-    pub fn gender(&self) -> &Gender {
-        &self.gender
-    }
-
     pub fn set_gender(&mut self, gender: Gender) {
         self.gender = gender;
-    }
-
-    pub fn birth_date(&self) -> &Date {
-        &self.birth_date
     }
 
     pub fn get_age(&self, date: Date) -> u32 {
@@ -84,16 +74,24 @@ impl Character {
         self.death_date.is_some()
     }
 
-    pub fn death_date(&self) -> &Option<Date> {
-        &self.death_date
-    }
-
     pub fn set_death_date(&mut self, death_date: Date) {
         if self.is_dead() {
             panic!("Character is already dead!");
         }
 
         self.death_date = Some(death_date);
+    }
+
+    pub fn get_building_relations_mut(&mut self) -> &mut Vec<BuildingRelation> {
+        &mut self.building_relations
+    }
+
+    pub fn relocate(&mut self, building_id: BuildingId) {
+        self.building_relations
+            .retain(|relation| *relation.relation_type() != Occupant);
+
+        self.building_relations
+            .push(BuildingRelation::new(Occupant, building_id));
     }
 }
 

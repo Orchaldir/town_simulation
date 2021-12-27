@@ -1,7 +1,7 @@
 use crate::generation::name::character::CharacterNameGenerator;
 use crate::model::character::gender::Gender;
 use crate::model::character::name::CharacterName;
-use crate::model::character::relation::{Relation, RelationType};
+use crate::model::character::relation::character::{CharacterRelation, CharacterRelationType};
 use crate::model::character::{CharacterId, CharacterMgr};
 use std::collections::HashSet;
 
@@ -49,7 +49,7 @@ pub fn add_relations(
     manager: &mut CharacterMgr,
     character: CharacterId,
     others: &HashSet<CharacterId>,
-    relation_type: RelationType,
+    relation_type: CharacterRelationType,
 ) {
     for other in others {
         add_relation(manager, character, *other, relation_type);
@@ -60,17 +60,17 @@ pub fn add_relation(
     manager: &mut CharacterMgr,
     character0: CharacterId,
     character1: CharacterId,
-    relation_type: RelationType,
+    relation_type: CharacterRelationType,
 ) {
     manager
         .get_mut(character1)
         .unwrap()
-        .relations
-        .push(Relation::new(relation_type, character0));
+        .character_relations
+        .push(CharacterRelation::new(relation_type, character0));
 
     manager
         .get_mut(character0)
         .unwrap()
-        .relations
-        .push(Relation::new(relation_type.reverse(), character1));
+        .character_relations
+        .push(CharacterRelation::new(relation_type.reverse(), character1));
 }
