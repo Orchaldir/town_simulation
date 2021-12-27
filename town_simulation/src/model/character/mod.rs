@@ -1,6 +1,6 @@
 use crate::model::character::gender::Gender;
 use crate::model::character::name::CharacterName;
-use crate::model::character::relation::character::Relation;
+use crate::model::character::relation::character::CharacterRelation;
 use crate::model::time::Date;
 use derive_more::Constructor;
 
@@ -24,7 +24,7 @@ pub struct Character {
     gender: Gender,
     birth_date: Date,
     death_date: Option<Date>,
-    pub relations: Vec<Relation>,
+    pub character_relations: Vec<CharacterRelation>,
 }
 
 impl Character {
@@ -35,7 +35,7 @@ impl Character {
             gender: Gender::default(),
             birth_date: Date::default(),
             death_date: None,
-            relations: Vec::new(),
+            character_relations: Vec::new(),
         }
     }
 

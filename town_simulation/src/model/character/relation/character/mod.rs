@@ -5,18 +5,18 @@ use crate::model::character::CharacterId;
 use derive_getters::Getters;
 use derive_more::Constructor;
 use std::cmp::Ordering;
-use RelationType::*;
+use CharacterRelationType::*;
 
 pub mod family;
 
 #[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
-pub enum RelationType {
+pub enum CharacterRelationType {
     InLaw(RelativeType),
     Relative(RelativeType),
     Spouse,
 }
 
-impl RelationType {
+impl CharacterRelationType {
     pub fn reverse(&self) -> Self {
         match self {
             InLaw(relative_type) => InLaw(relative_type.reverse()),
@@ -46,12 +46,12 @@ impl RelationType {
 }
 
 #[derive(Constructor, Getters, Copy, Clone, Debug, Eq, PartialEq)]
-pub struct Relation {
-    relation_type: RelationType,
+pub struct CharacterRelation {
+    relation_type: CharacterRelationType,
     id: CharacterId,
 }
 
-impl Relation {
+impl CharacterRelation {
     pub fn to_in_law(&self) -> Option<Self> {
         match self.relation_type {
             Relative(relative_type) => Some(Self::new(InLaw(relative_type), self.id)),
@@ -60,13 +60,13 @@ impl Relation {
     }
 }
 
-impl PartialOrd<Self> for Relation {
+impl PartialOrd<Self> for CharacterRelation {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.relation_type.partial_cmp(&other.relation_type)
     }
 }
 
-impl Ord for Relation {
+impl Ord for CharacterRelation {
     fn cmp(&self, other: &Self) -> Ordering {
         self.relation_type.cmp(&other.relation_type)
     }

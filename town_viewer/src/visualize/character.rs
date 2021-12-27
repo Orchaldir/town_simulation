@@ -1,5 +1,5 @@
 use crate::visualize::html;
-use town_simulation::model::character::relation::character::Relation;
+use town_simulation::model::character::relation::character::CharacterRelation;
 use town_simulation::model::character::{Character, CharacterId, CharacterMgr};
 use town_simulation::model::time::Date;
 use town_simulation::usecase::character::relation::get::{
@@ -134,7 +134,11 @@ fn show_in_laws(manager: &CharacterMgr, id: CharacterId) -> String {
     show_relations(manager, get_relation_to_in_laws(manager, id), "In-Laws")
 }
 
-fn show_relations(manager: &CharacterMgr, mut relations: Vec<&Relation>, text: &str) -> String {
+fn show_relations(
+    manager: &CharacterMgr,
+    mut relations: Vec<&CharacterRelation>,
+    text: &str,
+) -> String {
     if relations.is_empty() {
         "".to_string()
     } else {
@@ -148,7 +152,7 @@ fn show_relations(manager: &CharacterMgr, mut relations: Vec<&Relation>, text: &
     }
 }
 
-fn show_relation(manager: &CharacterMgr, relation: &Relation) -> String {
+fn show_relation(manager: &CharacterMgr, relation: &CharacterRelation) -> String {
     let other = manager.get(*relation.id()).unwrap();
     format!(
         "   <li><a href=\"/character/{}\">{}</a> ({})</li>",

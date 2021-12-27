@@ -1,14 +1,14 @@
-use crate::model::character::relation::character::RelationType;
+use crate::model::character::relation::character::CharacterRelationType;
 use crate::model::character::{CharacterId, CharacterMgr};
 
 pub fn get_relation(
     manager: &CharacterMgr,
     from: CharacterId,
     to: CharacterId,
-) -> Option<RelationType> {
+) -> Option<CharacterRelationType> {
     if let Some(character) = manager.get(from) {
         return character
-            .relations
+            .character_relations
             .iter()
             .find(|&relation| *relation.id() == to)
             .map(|relation| *relation.relation_type());
@@ -25,7 +25,7 @@ pub fn is_relative(manager: &CharacterMgr, id0: CharacterId, id1: CharacterId) -
 mod tests {
     use super::*;
     use crate::model::character::relation::character::family::RelativeType::*;
-    use crate::model::character::relation::character::RelationType::*;
+    use crate::model::character::relation::character::CharacterRelationType::*;
     use crate::usecase::character::birth::birth;
 
     #[test]
@@ -68,7 +68,7 @@ mod tests {
         manager: &CharacterMgr,
         from: CharacterId,
         to: CharacterId,
-        result: Option<RelationType>,
+        result: Option<CharacterRelationType>,
     ) {
         assert_eq!(get_relation(&manager, from, to), result);
         assert_eq!(is_relative(&manager, from, to), result.is_some());
