@@ -55,6 +55,7 @@ pub fn get_buildings_build_by(manager: &CharacterMgr, id: CharacterId) -> HashSe
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::usecase::building::occupancy::get_occupants;
     use crate::usecase::building::ownership::{get_buildings_owned_by, get_owner};
     use crate::util::assert::assert;
 
@@ -80,6 +81,17 @@ mod tests {
             [building],
         );
         assert!(get_buildings_owned_by(&data.character_manager, builder).is_empty());
+    }
+
+    #[test]
+    fn no_occupants_after_build() {
+        let mut data = SimulationData::default();
+        let builder = data.character_manager.create();
+        let owner = data.character_manager.create();
+
+        let building = build(&mut data, 1, 2, BuildingUsage::house(), builder, owner);
+
+        assert!(get_occupants(&data.building_manager, building).is_empty());
     }
 
     #[test]

@@ -37,3 +37,39 @@ pub fn relocate_to_house(
             .push(BuildingRelation::new(Occupant, building_id));
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model::building::usage::BuildingUsage;
+    use crate::usecase::building::build::build;
+    use crate::usecase::building::occupancy::{get_building_occupied_by, get_occupants};
+    use crate::util::assert::assert;
+
+    #[test]
+    fn no_occupants_after_build() {
+        let mut data = SimulationData::default();
+        let builder = data.character_manager.create();
+        let owner = data.character_manager.create();
+        let occupant0 = data.character_manager.create();
+        let occupant1 = data.character_manager.create();
+
+        let building = build(&mut data, 1, 2, BuildingUsage::house(), builder, owner);
+
+        relocate_to_house(&mut data, vec![occupant0, occupant1], building);
+
+        assert(
+            get_occupants(&data.building_manager, building),
+            [occupant0, occupant1],
+        );
+
+        assert_eq!(
+            get_building_occupied_by(&data.character_manager, occupant0),
+            Some(building)
+        );
+        assert_eq!(
+            get_building_occupied_by(&data.character_manager, occupant1),
+            Some(building)
+        );
+    }
+}
