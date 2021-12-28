@@ -46,16 +46,22 @@ impl CharacterName {
     pub fn marry<S: Into<String>>(&self, new_last: S) -> Self {
         match self {
             Simple(..) => self.clone(),
-            Standard { first, last } => Married {
+            Standard { first, last } => self.check_came_last_name(first, new_last.into(), last),
+            Married { first, birth, .. } => {
+                self.check_came_last_name(first, new_last.into(), birth)
+            }
+        }
+    }
+
+    fn check_came_last_name(&self, first: &str, last: String, birth: &str) -> Self {
+        if last.eq(birth) {
+            Self::standard(first.to_string(), last)
+        } else {
+            Married {
                 first: first.to_string(),
-                last: new_last.into(),
-                birth: last.to_string(),
-            },
-            Married { first, birth, .. } => Married {
-                first: first.to_string(),
-                last: new_last.into(),
+                last,
                 birth: birth.to_string(),
-            },
+            }
         }
     }
 
@@ -125,5 +131,12 @@ mod tests {
         assert_eq!(simple.marry("Ccc"), simple);
         assert_eq!(standard.marry("Ccc"), married);
         assert_eq!(married.marry("Ddd"), married2);
+    }
+
+    #[test]
+    fn test_marry_with_same_last_name() {
+        let character = CharacterName::standard("Aaa", "Bbb");
+
+        assert_eq!(character.marry("Bbb"), character);
     }
 }
