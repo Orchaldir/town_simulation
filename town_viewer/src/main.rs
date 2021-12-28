@@ -67,7 +67,7 @@ fn get_town(data: &State<ViewerData>) -> Html<String> {
 
 #[rocket::main]
 async fn main() {
-    let simulation_data = init_simulation(Date::new(1800), 30, 50);
+    let simulation_data = init_simulation(Date::new(1800), 100, 50);
 
     let data = ViewerData {
         data: Mutex::new(simulation_data),

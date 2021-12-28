@@ -1,9 +1,10 @@
 use crate::model::building::usage::BuildingUsage;
 use crate::model::building::{BuildingId, BuildingMgr};
 use crate::model::character::relation::building::BuildingRelation;
-use crate::model::character::relation::building::BuildingRelationType::{Builder, Owner};
+use crate::model::character::relation::building::BuildingRelationType::Builder;
 use crate::model::character::{CharacterId, CharacterMgr};
 use crate::usecase::building::get_building_relation;
+use crate::usecase::building::ownership::add_ownership;
 use crate::SimulationData;
 use std::collections::HashSet;
 
@@ -28,12 +29,7 @@ pub fn build(
         .get_building_relations_mut()
         .push(builder_relation);
 
-    let owner_relation = BuildingRelation::new(Owner, building_id);
-    data.character_manager
-        .get_mut(owner)
-        .unwrap()
-        .get_building_relations_mut()
-        .push(owner_relation);
+    add_ownership(&mut data.character_manager, building_id, owner);
 
     building_id
 }

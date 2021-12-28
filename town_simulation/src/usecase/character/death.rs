@@ -1,6 +1,8 @@
 use crate::model::character::{CharacterId, CharacterMgr};
 use crate::model::time::Date;
 use crate::usecase::building::occupancy::remove_occupant_from_building;
+use crate::usecase::building::ownership::{get_buildings_owned_by, update_owner};
+use crate::usecase::character::relation::get::{get_children, get_grandchildren, get_spouses};
 use crate::SimulationData;
 
 pub fn death(data: &mut SimulationData, id: CharacterId) {
@@ -11,7 +13,7 @@ pub fn death(data: &mut SimulationData, id: CharacterId) {
     character.set_death_date(data.date);
     character.remove_occupancy();
 
-    // TODO: ownership?
+    inherit(data, id);
 }
 
 pub fn is_alive(manager: &CharacterMgr, id: CharacterId) -> bool {
@@ -24,6 +26,36 @@ pub fn is_dead(manager: &CharacterMgr, id: CharacterId) -> bool {
 
 pub fn get_death_date(manager: &CharacterMgr, id: CharacterId) -> &Option<Date> {
     manager.get(id).unwrap().death_date()
+}
+
+fn inherit(data: &mut SimulationData, id: CharacterId) {
+    if let Some(heir_id) = get_heir(&data.character_manager, id) {
+        for building_id in get_buildings_owned_by(&data.character_manager, id) {
+            update_owner(data, building_id, id, heir_id);
+        }
+    }
+}
+
+fn get_heir(manager: &CharacterMgr, id: CharacterId) -> Option<CharacterId> {
+    for spouse_id in get_spouses(manager, id) {
+        if is_alive(manager, spouse_id) {
+            return Some(spouse_id);
+        }
+    }
+
+    for child_id in get_children(manager, id) {
+        if is_alive(manager, child_id) {
+            return Some(child_id);
+        }
+    }
+
+    for grandchild_id in get_grandchildren(manager, id) {
+        if is_alive(manager, grandchild_id) {
+            return Some(grandchild_id);
+        }
+    }
+
+    None
 }
 
 #[cfg(test)]
