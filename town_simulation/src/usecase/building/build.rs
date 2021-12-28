@@ -65,10 +65,10 @@ mod tests {
         assert_eq!(get_owner(&data.building_manager, building), owner);
 
         assert(
-            get_buildings_build_by_id(&data.character_manager, builder),
+            get_buildings_build_by(&data.character_manager, builder),
             [building],
         );
-        assert!(get_buildings_build_by_id(&data.character_manager, owner).is_empty());
+        assert!(get_buildings_build_by(&data.character_manager, owner).is_empty());
 
         assert(
             get_buildings_owned_by(&data.character_manager, owner),
