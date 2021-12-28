@@ -22,6 +22,7 @@ pub struct Building {
     construction_date: Date,
     builder: CharacterId,
     owner: CharacterId,
+    previous_owners: Vec<CharacterId>,
 }
 
 impl Building {
@@ -43,6 +44,7 @@ impl Building {
     }
 
     pub fn update_owner(&mut self, owner: CharacterId) {
+        self.previous_owners.push(self.owner);
         self.owner = owner;
     }
 }
@@ -61,7 +63,7 @@ impl BuildingMgr {
         owner: CharacterId,
     ) -> BuildingId {
         let id = BuildingId::new(self.buildings.len());
-        let building = Building::new(id, usage, construction_date, builder, owner);
+        let building = Building::new(id, usage, construction_date, builder, owner, Vec::new());
         self.buildings.push(building);
         id
     }
@@ -93,6 +95,7 @@ mod tests {
             Date::new(10),
             character_id,
             character_id,
+            Vec::new(),
         );
 
         assert_eq!(building.get_age(Date::new(52)), 42);

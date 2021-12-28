@@ -35,14 +35,15 @@ pub fn visualize_building(data: &SimulationData, id: usize) -> String {
   <p><b>Construction Date:</b> {1}</p>
   <p><b>Age:</b> {2}</p>
   <p><b>Builder:</b> {3}</p>
-  <p><b>Owner:</b> {4}</p>
-  {5}
+  <p><b>Owner:</b> {4}</p>{5}
+  {6}
   <a href=\"/building\">Back</a>",
             id,
             building.construction_date().get_year(),
             building.get_age(data.date),
             show_character_id_link(&data.character_manager, *building.builder()),
             show_character_id_link(&data.character_manager, *building.owner()),
+            show_previous_owners(&data.character_manager, building.previous_owners()),
             show_usage(&data.character_manager, building.usage()),
         ))
     } else {
@@ -82,6 +83,22 @@ pub fn show_building_link(building: &Building) -> String {
         building.id().id(),
         building.usage()
     )
+}
+
+fn show_previous_owners(manager: &CharacterMgr, previous_owners: &[CharacterId]) -> String {
+    if previous_owners.is_empty() {
+        "".to_string()
+    } else {
+        let vector: Vec<String> = previous_owners
+            .iter()
+            .map(|id| show_occupant(manager, *id))
+            .collect();
+
+        format!(
+            "\n<p><b>Previous Owners:</b></p>\n<ul>{}</ul>",
+            vector.join("\n")
+        )
+    }
 }
 
 fn show_usage(manager: &CharacterMgr, usage: &BuildingUsage) -> String {
