@@ -95,7 +95,7 @@ fn show_previous_owners(manager: &CharacterMgr, previous_owners: &[CharacterId])
             .collect();
 
         format!(
-            "\n<p><b>Previous Owners:</b></p>\n<ul>{}</ul>",
+            "\n<p><b>Former Owners:</b></p>\n<ul>{}</ul>",
             vector.join("\n")
         )
     }
