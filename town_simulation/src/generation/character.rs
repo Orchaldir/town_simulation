@@ -1,17 +1,15 @@
-use crate::generation::name::character::CharacterNameGenerator;
-use crate::model::character::{CharacterId, CharacterMgr};
-use crate::model::time::Date;
+use crate::model::character::CharacterId;
+use crate::SimulationData;
+use crate::usecase::building::relocate::join_parents_home;
 use crate::usecase::character::birth::{birth, set_birth_date};
 use crate::usecase::character::{set_gender_based_on_id, set_generated_name};
 
 pub fn generate_child(
-    manager: &mut CharacterMgr,
-    name_generator: &CharacterNameGenerator,
+    data: &mut SimulationData,
     id0: CharacterId,
     id1: CharacterId,
-    date: Date,
 ) -> CharacterId {
-    let child_id = birth(manager, id0, id1);
+    let child_id = birth(&mut data.character_manager, id0, id1);
 
     println!(
         "Characters {} & {} get child {}",
@@ -20,9 +18,11 @@ pub fn generate_child(
         child_id.id()
     );
 
-    set_birth_date(manager, child_id, date);
-    set_gender_based_on_id(manager, child_id);
-    set_generated_name(manager, name_generator, child_id);
+    set_birth_date(&mut data.character_manager, child_id, data.date);
+    set_gender_based_on_id(&mut data.character_manager, child_id);
+    set_generated_name(&mut data.character_manager, &data.character_name_generator, child_id);
+
+    join_parents_home(data, vec![child_id], id0);
 
     child_id
 }

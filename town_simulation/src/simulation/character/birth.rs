@@ -9,11 +9,9 @@ const BIRTH: u32 = 3;
 pub fn simulate_birth(data: &mut SimulationData, rng: &RandomNumberGenerator) {
     for (id0, id1) in calculate_expecting(&data, rng, 45, 10) {
         generate_child(
-            &mut data.character_manager,
-            &data.character_name_generator,
+            data,
             id0,
             id1,
-            data.date,
         );
     }
 }
