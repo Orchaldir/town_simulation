@@ -3,6 +3,7 @@ use crate::model::building::{BuildingId, BuildingMgr};
 use crate::model::character::relation::building::BuildingRelation;
 use crate::model::character::relation::building::BuildingRelationType::{Builder, Owner};
 use crate::model::character::{CharacterId, CharacterMgr};
+use crate::usecase::building::get_building_relation;
 use crate::SimulationData;
 use std::collections::HashSet;
 
@@ -42,14 +43,7 @@ pub fn get_builder(manager: &BuildingMgr, id: BuildingId) -> CharacterId {
 }
 
 pub fn get_buildings_build_by(manager: &CharacterMgr, id: CharacterId) -> HashSet<BuildingId> {
-    manager
-        .get(id)
-        .unwrap()
-        .building_relations()
-        .iter()
-        .filter(|&relation| *relation.relation_type() == Builder)
-        .map(|relation| *relation.id())
-        .collect()
+    get_building_relation(manager, id, Builder)
 }
 
 #[cfg(test)]
@@ -71,10 +65,10 @@ mod tests {
         assert_eq!(get_owner(&data.building_manager, building), owner);
 
         assert(
-            get_buildings_build_by(&data.character_manager, builder),
+            get_buildings_build_by_id(&data.character_manager, builder),
             [building],
         );
-        assert!(get_buildings_build_by(&data.character_manager, owner).is_empty());
+        assert!(get_buildings_build_by_id(&data.character_manager, owner).is_empty());
 
         assert(
             get_buildings_owned_by(&data.character_manager, owner),

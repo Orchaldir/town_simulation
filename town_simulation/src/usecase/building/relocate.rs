@@ -39,7 +39,7 @@ mod tests {
     use super::*;
     use crate::model::building::usage::BuildingUsage;
     use crate::usecase::building::build::build;
-    use crate::usecase::building::occupancy::{get_building_occupied_by, get_occupants};
+    use crate::usecase::building::occupancy::{get_building_occupied_for_id, get_occupants};
     use crate::util::assert::assert;
 
     #[test]
@@ -60,11 +60,11 @@ mod tests {
         );
 
         assert_eq!(
-            get_building_occupied_by(&data.character_manager, occupant0),
+            get_building_occupied_for_id(&data.character_manager, occupant0),
             Some(building)
         );
         assert_eq!(
-            get_building_occupied_by(&data.character_manager, occupant1),
+            get_building_occupied_for_id(&data.character_manager, occupant1),
             Some(building)
         );
     }
@@ -86,7 +86,7 @@ mod tests {
         assert(get_occupants(&data.building_manager, building1), [occupant]);
 
         assert_eq!(
-            get_building_occupied_by(&data.character_manager, occupant),
+            get_building_occupied_for_id(&data.character_manager, occupant),
             Some(building1)
         );
     }
