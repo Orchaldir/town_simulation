@@ -24,13 +24,15 @@ pub fn simulate_marriage(data: &mut SimulationData, rng: &RandomNumberGenerator)
 
     for id in selected_characters {
         if let Some(spouse) = select_spouse(&data.character_manager, id, &remaining) {
-            if get_gender(&data.character_manager, id) == Male {
-                marry(&mut data.character_manager, id, spouse);
-                relocate(data, vec![id, spouse]);
+            let (husband, wife) = if get_gender(&data.character_manager, id) == Male {
+                (id, spouse)
             } else {
-                marry(&mut data.character_manager, spouse, id);
-                relocate(data, vec![spouse, id]);
-            }
+                (spouse, id)
+            };
+
+            marry(&mut data.character_manager, husband, wife);
+            // TODO: ownership?
+            relocate(data, vec![husband, wife]);
 
             remaining.remove(&spouse);
         }

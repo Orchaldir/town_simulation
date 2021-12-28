@@ -87,11 +87,15 @@ impl Character {
     }
 
     pub fn relocate(&mut self, building_id: BuildingId) {
-        self.building_relations
-            .retain(|relation| *relation.relation_type() != Occupant);
+        self.remove_occupancy();
 
         self.building_relations
             .push(BuildingRelation::new(Occupant, building_id));
+    }
+
+    pub fn remove_occupancy(&mut self) {
+        self.building_relations
+            .retain(|relation| *relation.relation_type() != Occupant);
     }
 }
 
