@@ -7,7 +7,11 @@ use crate::usecase::character::relation::get::*;
 use crate::usecase::character::{add_relation, add_relations};
 use std::collections::HashSet;
 
-pub fn birth(manager: &mut CharacterMgr, father: CharacterId, mother: CharacterId) -> CharacterId {
+pub fn birth_with_relations(
+    manager: &mut CharacterMgr,
+    father: CharacterId,
+    mother: CharacterId,
+) -> CharacterId {
     let parents = [father, mother].into();
     let child = manager.create();
     let siblings = get_shared_children(manager, father, mother);

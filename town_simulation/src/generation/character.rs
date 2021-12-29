@@ -1,6 +1,6 @@
 use crate::model::character::CharacterId;
 use crate::usecase::building::relocate::join_parents_home;
-use crate::usecase::character::birth::{birth, set_birth_date};
+use crate::usecase::character::birth::{birth_with_relations, set_birth_date};
 use crate::usecase::character::{set_gender_based_on_id, set_generated_name};
 use crate::SimulationData;
 
@@ -9,7 +9,7 @@ pub fn generate_child(
     id0: CharacterId,
     id1: CharacterId,
 ) -> CharacterId {
-    let child_id = birth(&mut data.character_manager, id0, id1);
+    let child_id = birth_with_relations(&mut data.character_manager, id0, id1);
 
     println!(
         "Characters {} & {} get child {}",
