@@ -29,11 +29,8 @@ pub fn get_death_date(manager: &CharacterMgr, id: CharacterId) -> &Option<Date> 
 }
 
 fn inherit(data: &mut SimulationData, id: CharacterId) {
-    println!("inherit {}", id.id());
     if let Some(heir_id) = get_heir(&data.character_manager, id) {
-        println!("heir {}", heir_id.id());
         for building_id in get_buildings_owned_by(&data.character_manager, id) {
-            println!("building {}", building_id.id());
             update_owner(data, building_id, id, heir_id);
         }
     }
