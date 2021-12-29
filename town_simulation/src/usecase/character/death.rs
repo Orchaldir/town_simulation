@@ -29,8 +29,11 @@ pub fn get_death_date(manager: &CharacterMgr, id: CharacterId) -> &Option<Date> 
 }
 
 fn inherit(data: &mut SimulationData, id: CharacterId) {
+    println!("inherit {}", id.id());
     if let Some(heir_id) = get_heir(&data.character_manager, id) {
+        println!("heir {}", heir_id.id());
         for building_id in get_buildings_owned_by(&data.character_manager, id) {
+            println!("building {}", building_id.id());
             update_owner(data, building_id, id, heir_id);
         }
     }
@@ -61,6 +64,13 @@ fn get_heir(manager: &CharacterMgr, id: CharacterId) -> Option<CharacterId> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::model::building::usage::BuildingUsage;
+    use crate::usecase::building::build::{build, get_builder};
+    use crate::usecase::building::occupancy::{get_building_occupied_by, get_occupants};
+    use crate::usecase::building::ownership::get_owner;
+    use crate::usecase::building::relocate::relocate_to_house;
+    use crate::usecase::character::marriage::marry;
+    use crate::util::assert::assert;
 
     #[test]
     fn characters_start_alive() {
@@ -105,5 +115,67 @@ mod tests {
         data.date = Date::new(43);
 
         death(&mut data, id);
+    }
+
+    #[test]
+    fn dead_characters_are_not_occupants() {
+        let mut data = SimulationData::default();
+
+        let character_id = data.character_manager.create();
+        let other_id = data.character_manager.create();
+        let building_id =
+            data.building_manager
+                .create(BuildingUsage::house(), data.date, other_id, other_id);
+
+        relocate_to_house(&mut data, vec![character_id, other_id], building_id);
+
+        death(&mut data, character_id);
+
+        assert_eq!(
+            get_building_occupied_by(&data.character_manager, character_id),
+            None
+        );
+        assert_eq!(
+            get_building_occupied_by(&data.character_manager, other_id),
+            Some(building_id)
+        );
+        assert(
+            get_occupants(&data.building_manager, building_id),
+            [other_id],
+        );
+    }
+
+    #[test]
+    fn child_inherits_after_death() {
+        let mut data = SimulationData::default();
+
+        let character_id = data.character_manager.create();
+        let spouse_id = data.character_manager.create();
+
+        marry(&mut data.character_manager, character_id, spouse_id);
+
+        let building_id = build(
+            &mut data,
+            0,
+            0,
+            BuildingUsage::house(),
+            character_id,
+            character_id,
+        );
+
+        relocate_to_house(&mut data, vec![character_id, spouse_id], building_id);
+
+        death(&mut data, character_id);
+
+        assert_eq!(get_builder(&data.building_manager, building_id), character_id);
+        assert_eq!(get_owner(&data.building_manager, building_id), spouse_id);
+        assert(
+            get_buildings_owned_by(&data.character_manager, character_id),
+            [],
+        );
+        assert(
+            get_buildings_owned_by(&data.character_manager, spouse_id),
+            [building_id],
+        );
     }
 }
