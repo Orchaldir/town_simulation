@@ -3,9 +3,36 @@ use crate::model::character::relation::character::family::RelativeType::*;
 use crate::model::character::relation::character::CharacterRelationType::*;
 use crate::model::character::{CharacterId, CharacterMgr};
 use crate::model::time::Date;
+use crate::usecase::building::relocate::join_parents_home;
 use crate::usecase::character::relation::get::*;
-use crate::usecase::character::{add_relation, add_relations};
+use crate::usecase::character::{
+    add_relation, add_relations, set_gender_based_on_id, set_generated_name,
+};
+use crate::SimulationData;
 use std::collections::HashSet;
+
+pub fn birth(data: &mut SimulationData, id0: CharacterId, id1: CharacterId) -> CharacterId {
+    let child_id = birth_with_relations(&mut data.character_manager, id0, id1);
+
+    println!(
+        "Characters {} & {} get child {}",
+        id0.id(),
+        id1.id(),
+        child_id.id()
+    );
+
+    set_birth_date(&mut data.character_manager, child_id, data.date);
+    set_gender_based_on_id(&mut data.character_manager, child_id);
+    set_generated_name(
+        &mut data.character_manager,
+        &data.character_name_generator,
+        child_id,
+    );
+
+    join_parents_home(data, vec![child_id], id0);
+
+    child_id
+}
 
 pub fn birth_with_relations(
     manager: &mut CharacterMgr,
