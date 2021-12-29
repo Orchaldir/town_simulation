@@ -167,7 +167,10 @@ mod tests {
 
         death(&mut data, character_id);
 
-        assert_eq!(get_builder(&data.building_manager, building_id), character_id);
+        assert_eq!(
+            get_builder(&data.building_manager, building_id),
+            character_id
+        );
         assert_eq!(get_owner(&data.building_manager, building_id), spouse_id);
         assert(
             get_buildings_owned_by(&data.character_manager, character_id),

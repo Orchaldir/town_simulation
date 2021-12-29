@@ -97,6 +97,12 @@ fn add_in_laws(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::model::building::usage::BuildingUsage;
+    use crate::usecase::building::build::build;
+    use crate::usecase::building::occupancy::{get_building_occupied_by, get_occupants};
+    use crate::usecase::building::relocate::relocate_to_house;
+    use crate::usecase::character::marriage::marry;
+    use crate::util::assert::assert;
 
     #[test]
     fn set_birth_date_of_character() {
@@ -107,5 +113,37 @@ mod tests {
         set_birth_date(&mut manager, id, date);
 
         assert_eq!(get_birth_date(&manager, id), &date)
+    }
+
+    #[test]
+    fn child_live_in_their_parents_home() {
+        let mut data = SimulationData::default();
+
+        let parent_id0 = data.character_manager.create();
+        let parent_id1 = data.character_manager.create();
+
+        marry(&mut data.character_manager, parent_id0, parent_id1);
+
+        let building_id = build(
+            &mut data,
+            0,
+            0,
+            BuildingUsage::house(),
+            parent_id0,
+            parent_id0,
+        );
+
+        relocate_to_house(&mut data, vec![parent_id0, parent_id1], building_id);
+
+        let child_id = birth(&mut data, parent_id0, parent_id1);
+
+        assert_eq!(
+            get_building_occupied_by(&data.character_manager, child_id),
+            Some(building_id)
+        );
+        assert(
+            get_occupants(&data.building_manager, building_id),
+            [parent_id0, parent_id1, child_id],
+        );
     }
 }
