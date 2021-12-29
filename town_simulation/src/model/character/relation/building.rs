@@ -7,6 +7,7 @@ use std::cmp::Ordering;
 pub enum BuildingRelationType {
     Builder,
     Owner,
+    ExOwner,
     Occupant,
 }
 

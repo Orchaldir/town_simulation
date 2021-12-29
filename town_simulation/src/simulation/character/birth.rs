@@ -1,6 +1,6 @@
-use crate::generation::character::generate_child;
 use crate::generation::number::RandomNumberGenerator;
 use crate::model::character::CharacterId;
+use crate::usecase::character::birth::birth;
 use crate::usecase::character::marriage::get_married_couples;
 use crate::SimulationData;
 
@@ -8,13 +8,7 @@ const BIRTH: u32 = 3;
 
 pub fn simulate_birth(data: &mut SimulationData, rng: &RandomNumberGenerator) {
     for (id0, id1) in calculate_expecting(&data, rng, 45, 10) {
-        generate_child(
-            &mut data.character_manager,
-            &data.character_name_generator,
-            id0,
-            id1,
-            data.date,
-        );
+        birth(data, id0, id1);
     }
 }
 

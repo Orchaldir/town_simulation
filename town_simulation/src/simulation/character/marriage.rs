@@ -1,6 +1,7 @@
 use crate::generation::number::RandomNumberGenerator;
 use crate::model::character::gender::Gender::Male;
 use crate::model::character::{CharacterId, CharacterMgr};
+use crate::simulation::building::relocate;
 use crate::usecase::character::get_gender;
 use crate::usecase::character::marriage::{get_unmarried, marry};
 use crate::usecase::character::relation::get::get_relatives;
@@ -23,11 +24,15 @@ pub fn simulate_marriage(data: &mut SimulationData, rng: &RandomNumberGenerator)
 
     for id in selected_characters {
         if let Some(spouse) = select_spouse(&data.character_manager, id, &remaining) {
-            if get_gender(&data.character_manager, id) == Male {
-                marry(&mut data.character_manager, id, spouse);
+            let (husband, wife) = if get_gender(&data.character_manager, id) == Male {
+                (id, spouse)
             } else {
-                marry(&mut data.character_manager, spouse, id);
-            }
+                (spouse, id)
+            };
+
+            marry(&mut data.character_manager, husband, wife);
+            // TODO: ownership?
+            relocate(data, vec![husband, wife]);
 
             remaining.remove(&spouse);
         }

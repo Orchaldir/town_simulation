@@ -3,11 +3,42 @@ use crate::model::character::relation::character::family::RelativeType::*;
 use crate::model::character::relation::character::CharacterRelationType::*;
 use crate::model::character::{CharacterId, CharacterMgr};
 use crate::model::time::Date;
+use crate::usecase::building::relocate::join_parents_home;
 use crate::usecase::character::relation::get::*;
-use crate::usecase::character::{add_relation, add_relations};
+use crate::usecase::character::{
+    add_relation, add_relations, set_gender_based_on_id, set_generated_name,
+};
+use crate::SimulationData;
 use std::collections::HashSet;
 
-pub fn birth(manager: &mut CharacterMgr, father: CharacterId, mother: CharacterId) -> CharacterId {
+pub fn birth(data: &mut SimulationData, id0: CharacterId, id1: CharacterId) -> CharacterId {
+    let child_id = birth_with_relations(&mut data.character_manager, id0, id1);
+
+    println!(
+        "Characters {} & {} get child {}",
+        id0.id(),
+        id1.id(),
+        child_id.id()
+    );
+
+    set_birth_date(&mut data.character_manager, child_id, data.date);
+    set_gender_based_on_id(&mut data.character_manager, child_id);
+    set_generated_name(
+        &mut data.character_manager,
+        &data.character_name_generator,
+        child_id,
+    );
+
+    join_parents_home(data, vec![child_id], id0);
+
+    child_id
+}
+
+pub fn birth_with_relations(
+    manager: &mut CharacterMgr,
+    father: CharacterId,
+    mother: CharacterId,
+) -> CharacterId {
     let parents = [father, mother].into();
     let child = manager.create();
     let siblings = get_shared_children(manager, father, mother);
@@ -66,6 +97,12 @@ fn add_in_laws(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::model::building::usage::BuildingUsage;
+    use crate::usecase::building::build::build;
+    use crate::usecase::building::occupancy::{get_building_occupied_by, get_occupants};
+    use crate::usecase::building::relocate::relocate_to_house;
+    use crate::usecase::character::marriage::marry;
+    use crate::util::assert::assert;
 
     #[test]
     fn set_birth_date_of_character() {
@@ -76,5 +113,37 @@ mod tests {
         set_birth_date(&mut manager, id, date);
 
         assert_eq!(get_birth_date(&manager, id), &date)
+    }
+
+    #[test]
+    fn child_live_in_their_parents_home() {
+        let mut data = SimulationData::default();
+
+        let parent_id0 = data.character_manager.create();
+        let parent_id1 = data.character_manager.create();
+
+        marry(&mut data.character_manager, parent_id0, parent_id1);
+
+        let building_id = build(
+            &mut data,
+            0,
+            0,
+            BuildingUsage::house(),
+            parent_id0,
+            parent_id0,
+        );
+
+        relocate_to_house(&mut data, vec![parent_id0, parent_id1], building_id);
+
+        let child_id = birth(&mut data, parent_id0, parent_id1);
+
+        assert_eq!(
+            get_building_occupied_by(&data.character_manager, child_id),
+            Some(building_id)
+        );
+        assert(
+            get_occupants(&data.building_manager, building_id),
+            [parent_id0, parent_id1, child_id],
+        );
     }
 }

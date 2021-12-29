@@ -11,7 +11,7 @@ pub struct Entry {
     value: u32,
 }
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct NameGenerator {
     entries: Vec<Entry>,
     total_value: u32,
@@ -30,6 +30,11 @@ impl NameGenerator {
             entries,
             total_value,
         }
+    }
+
+    pub fn without_probability(names: Vec<String>) -> Self {
+        let entries = names.into_iter().map(|name| Entry::new(name, 1)).collect();
+        Self::new(entries)
     }
 
     pub fn read(path: &str) -> Self {
@@ -64,6 +69,12 @@ impl NameGenerator {
         }
 
         "IMPOSSIBLE"
+    }
+}
+
+impl Default for NameGenerator {
+    fn default() -> Self {
+        Self::without_probability(vec!["A".to_string(), "B".to_string(), "C".to_string()])
     }
 }
 

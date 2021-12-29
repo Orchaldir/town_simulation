@@ -1,10 +1,16 @@
-use crate::visualize::building::show_building_link;
+use crate::visualize::building::{show_building_id_link, show_building_link};
 use crate::visualize::html;
 use town_simulation::model::building::BuildingMgr;
-use town_simulation::model::character::relation::building::BuildingRelation;
+use town_simulation::model::character::relation::building::BuildingRelationType::{
+    Builder, ExOwner, Owner,
+};
+use town_simulation::model::character::relation::building::{
+    BuildingRelation, BuildingRelationType,
+};
 use town_simulation::model::character::relation::character::CharacterRelation;
 use town_simulation::model::character::{Character, CharacterId, CharacterMgr};
 use town_simulation::model::time::Date;
+use town_simulation::usecase::building::occupancy::get_building_occupied_by;
 use town_simulation::usecase::character::relation::get::{
     get_relation_to_in_laws, get_relation_to_relatives, get_spouses,
 };
@@ -46,10 +52,7 @@ pub fn visualize_character(data: &SimulationData, id: usize) -> String {
   <p><b>Birth Date:</b> {}</p>{}
   <p><b>Age:</b> {}</p>
   <h2>Characters</h2>{}{}{}
-  <h2>Buildings</h2>
-  <ul>
-    {}
-  </ul>
+  <h2>Buildings</h2>{}{}{}{}
   <a href=\"/character\">Back</a>",
             character.name(),
             id,
@@ -60,7 +63,10 @@ pub fn visualize_character(data: &SimulationData, id: usize) -> String {
             show_spouse(manager, character_id),
             show_relatives(manager, character_id),
             show_in_laws(manager, character_id),
-            show_building_relations(&data.building_manager, character.building_relations()),
+            show_home(data, character_id),
+            show_build_buildings(&data.building_manager, character.building_relations()),
+            show_owned_buildings(&data.building_manager, character.building_relations()),
+            show_ex_owned_buildings(&data.building_manager, character.building_relations()),
         ))
     } else {
         html(format!(
@@ -172,22 +178,59 @@ fn show_relation(manager: &CharacterMgr, relation: &CharacterRelation) -> String
     )
 }
 
-fn show_building_relations(manager: &BuildingMgr, relations: &[BuildingRelation]) -> String {
+fn show_home(data: &SimulationData, id: CharacterId) -> String {
+    if let Some(building_id) = get_building_occupied_by(&data.character_manager, id) {
+        format!(
+            "\n<p><b>Home:</b> {}</p>",
+            show_building_id_link(&data.building_manager, building_id),
+        )
+    } else {
+        "".to_string()
+    }
+}
+
+fn show_build_buildings(manager: &BuildingMgr, relations: &[BuildingRelation]) -> String {
+    show_building_relations(manager, relations, Builder, "Builder of")
+}
+
+fn show_owned_buildings(manager: &BuildingMgr, relations: &[BuildingRelation]) -> String {
+    show_building_relations(manager, relations, Owner, "Owner of")
+}
+
+fn show_ex_owned_buildings(manager: &BuildingMgr, relations: &[BuildingRelation]) -> String {
+    show_building_relations(manager, relations, ExOwner, "Former Owner of")
+}
+
+fn show_building_relations(
+    manager: &BuildingMgr,
+    relations: &[BuildingRelation],
+    relation_type: BuildingRelationType,
+    text: &str,
+) -> String {
     let vector: Vec<String> = relations
         .iter()
+        .filter(|&relation| *relation.relation_type() == relation_type)
         .map(|relation| show_building_relation(manager, relation))
         .collect();
 
-    vector.join("\n")
+    if vector.is_empty() {
+        "".to_string()
+    } else {
+        format!(
+            "
+  <p><b>{}:</b></p>
+  <ul>
+    {}
+  </ul>
+  ",
+            text,
+            vector.join("\n")
+        )
+    }
 }
 
 fn show_building_relation(manager: &BuildingMgr, relation: &BuildingRelation) -> String {
     let building = manager.get(*relation.id()).unwrap();
 
-    format!(
-        "   <li>{:?} of {} {}</li>",
-        relation.relation_type(),
-        building.usage(),
-        show_building_link(building),
-    )
+    format!("   <li>{}</li>", show_building_link(building),)
 }

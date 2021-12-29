@@ -7,7 +7,7 @@ const DEATH: u32 = 1;
 
 pub fn simulate_death(data: &mut SimulationData, rng: &RandomNumberGenerator) {
     for id in calculate_dying(data, rng, 60) {
-        death(&mut data.character_manager, id, data.date);
+        death(data, id);
     }
 }
 

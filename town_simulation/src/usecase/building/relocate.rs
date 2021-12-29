@@ -1,7 +1,9 @@
 use crate::model::building::usage::BuildingUsage::House;
 use crate::model::building::BuildingId;
 use crate::model::character::CharacterId;
-use crate::usecase::building::occupancy::get_building_occupied_by;
+use crate::usecase::building::occupancy::{
+    get_building_occupied_by, remove_occupant_from_building,
+};
 use crate::SimulationData;
 
 pub fn relocate_to_house(
@@ -25,13 +27,28 @@ pub fn relocate_to_house(
     }
 
     for character_id in character_ids {
-        if let Some(previous_id) = get_building_occupied_by(&data.character_manager, character_id) {
-            data.building_manager
-                .get_mut(previous_id)
-                .unwrap()
-                .remove_occupant(character_id);
-        }
+        remove_occupant_from_building(data, character_id);
 
+        data.character_manager
+            .get_mut(character_id)
+            .unwrap()
+            .relocate(building_id);
+    }
+}
+
+pub fn join_parents_home(
+    data: &mut SimulationData,
+    character_ids: Vec<CharacterId>,
+    parent_id: CharacterId,
+) {
+    let building_id = get_building_occupied_by(&data.character_manager, parent_id).unwrap();
+    let building = data.building_manager.get_mut(building_id).unwrap();
+
+    if let House(home) = building.get_usage_mut() {
+        home.get_occupants_mut().extend(&character_ids);
+    }
+
+    for character_id in character_ids {
         data.character_manager
             .get_mut(character_id)
             .unwrap()

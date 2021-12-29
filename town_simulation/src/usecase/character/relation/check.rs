@@ -26,7 +26,7 @@ mod tests {
     use super::*;
     use crate::model::character::relation::character::family::RelativeType::*;
     use crate::model::character::relation::character::CharacterRelationType::*;
-    use crate::usecase::character::birth::birth;
+    use crate::usecase::character::birth::birth_with_relations;
 
     #[test]
     fn test_get_relation() {
@@ -37,15 +37,15 @@ mod tests {
         let grandmother = manager.create();
 
         // generation 1
-        let father = birth(&mut manager, grandfather, grandmother);
-        let aunt = birth(&mut manager, grandfather, grandmother);
+        let father = birth_with_relations(&mut manager, grandfather, grandmother);
+        let aunt = birth_with_relations(&mut manager, grandfather, grandmother);
         let mother = manager.create();
         let husband_aunt = manager.create();
 
         // generation 2
-        let character = birth(&mut manager, father, mother);
-        let sibling = birth(&mut manager, father, mother);
-        let cousin = birth(&mut manager, husband_aunt, aunt);
+        let character = birth_with_relations(&mut manager, father, mother);
+        let sibling = birth_with_relations(&mut manager, father, mother);
+        let cousin = birth_with_relations(&mut manager, husband_aunt, aunt);
 
         assert(
             &manager,

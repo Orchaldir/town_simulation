@@ -4,6 +4,7 @@ use crate::simulation::character::death::simulate_death;
 use crate::simulation::character::marriage::simulate_marriage;
 use crate::SimulationData;
 
+pub mod building;
 pub mod character;
 
 pub fn simulate_year(data: &mut SimulationData) {
